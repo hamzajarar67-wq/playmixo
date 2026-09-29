@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -23,58 +22,13 @@ jobs:
           cache: true
 
       - name: Create Flutter Android project
+        run: flutter create --platforms=android .
+
+      - name: Configure Kotlin
         run: |
-          flutter create --platforms=android .
-
-      - name: Configure Kotlin for Firebase Auth
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          candidates = [
-              Path("android/settings.gradle"),
-              Path("android/settings.gradle.kts"),
-          ]
-
-          path = next((p for p in candidates if p.exists()), None)
-
-          if path is None:
-              raise SystemExit(
-                  "Could not find Android settings.gradle or settings.gradle.kts"
-              )
-
-          text = path.read_text()
-
-          patterns = [
-              (
-                  r"(id\s*\(\s*[\"']org\.jetbrains\.kotlin\.android[\"']\s*\)\s*version\s*[\"'])[^\"']+([\"'])",
-                  r"\g<1>2.3.0\g<2>",
-              ),
-              (
-                  r"(id\s+[\"']org\.jetbrains\.kotlin\.android[\"']\s+version\s+[\"'])[^\"']+([\"'])",
-                  r"\g<1>2.3.0\g<2>",
-              ),
-              (
-                  r"(org\.jetbrains\.kotlin\.android[\"']\s*version\s*[\"'])[^\"']+([\"'])",
-                  r"\g<1>2.3.0\g<2>",
-              ),
-          ]
-
-          original = text
-
-          for pattern, replacement in patterns:
-              text = re.sub(pattern, replacement, text)
-
-          if text == original:
-              print("Kotlin version pattern was not found.")
-              print("Android settings file:")
-              print(text)
-          else:
-              path.write_text(text)
-              print(f"Updated Kotlin plugin in {path}")
-              print(path.read_text())
-          PY
+          sed -i 's/2.1.0/2.3.0/g' android/settings.gradle.kts
+          sed -i 's/JavaVersion.VERSION_11/JavaVersion.VERSION_17/g' android/app/build.gradle.kts
+          sed -i '/jvmTarget = JavaVersion.VERSION_11.toString()/d' android/app/build.gradle.kts
 
       - name: Install ImageMagick
         run: |
@@ -86,9 +40,7 @@ jobs:
           mkdir -p assets
 
           cat > assets/playmixo_icon.svg <<'EOF'
-          <svg width="1024" height="1024" viewBox="0 0 1024 1024"
-               xmlns="http://www.w3.org/2000/svg">
-
+          <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#FFF2A6"/>
@@ -117,8 +69,7 @@ jobs:
             />
 
             <path
-              d="M365 235 L410 145 L475 205 L512 125
-                 L549 205 L614 145 L659 235 Z"
+              d="M365 235 L410 145 L475 205 L512 125 L549 205 L614 145 L659 235 Z"
               fill="url(#gold)"
               stroke="#FFF0A0"
               stroke-width="5"
@@ -169,19 +120,13 @@ jobs:
               letter-spacing="8"
               fill="#FFFFFF"
             >PLAY • CONNECT • ENJOY</text>
-
           </svg>
           EOF
 
-          convert \
-            -background none \
-            assets/playmixo_icon.svg \
-            -resize 1024x1024 \
-            assets/playmixo_icon.png
+          convert -background none assets/playmixo_icon.svg -resize 1024x1024 assets/playmixo_icon.png
 
       - name: Add Launcher Icon Package
-        run: |
-          flutter pub add --dev flutter_launcher_icons
+        run: flutter pub add --dev flutter_launcher_icons
 
       - name: Configure Playmixo App Icon
         run: |
@@ -196,20 +141,16 @@ jobs:
           EOF
 
       - name: Generate Playmixo App Icon
-        run: |
-          dart run flutter_launcher_icons
+        run: dart run flutter_launcher_icons
 
       - name: Get Flutter packages
-        run: |
-          flutter pub get
+        run: flutter pub get
 
       - name: Clean Flutter Build
-        run: |
-          flutter clean
+        run: flutter clean
 
       - name: Build APK
-        run: |
-          flutter build apk --release
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
