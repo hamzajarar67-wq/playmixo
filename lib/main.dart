@@ -491,6 +491,10 @@ Future<void> demoSocialLogin(String provider) async {
   }
 
   try {
+    await GoogleSignIn.instance.initialize(
+  serverClientId:
+      '249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com',
+);
     final googleUser =
         await GoogleSignIn.instance.authenticate();
 
