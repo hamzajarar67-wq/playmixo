@@ -290,119 +290,91 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> continueToApp() async {
-    final smsCode = otpController.text.trim();
+  final smsCode = otpController.text.trim();
 
-    if (smsCode.isEmpty) {
-      showMessage('Please enter OTP');
-      return;
+  if (smsCode.isEmpty) {
+    showMessage('Please enter OTP');
+    return;
+  }
+
+  if (smsCode.length != 6) {
+    showMessage('Please enter the 6-digit OTP');
+    return;
+  }
+
+  if (verificationId == null) {
+    showMessage('Please request a new OTP');
+    return;
+  }
+
+  FocusScope.of(context).unfocus();
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId!,
+      smsCode: smsCode,
+    );
+
+    final userCredential =
+        await _auth.signInWithCredential(credential);
+
+    final user = userCredential.user;
+
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+        'uid': user.uid,
+        'phone': user.phoneNumber ?? '',
+        'name': nameController.text.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     }
 
-    if (smsCode.length != 6) {
-      showMessage('Please enter the 6-digit OTP');
-      return;
-    }
-
-    if (verificationId == null) {
-      showMessage('Please request a new OTP');
-      return;
-    }
-
-    FocusScope.of(context).unfocus();
+    if (!mounted) return;
 
     setState(() {
-      isLoading = true;
+      isLoading = false;
     });
 
-    try {
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId!,
-        smsCode: smsCode,
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (e.code == 'invalid-verification-code') {
+      showMessage('Invalid OTP. Please check the code.');
+    } else if (e.code == 'session-expired') {
+      showMessage('OTP expired. Please request a new OTP.');
+    } else {
+      showMessage(
+        e.message ?? 'Verification failed',
       );
-
-      await _auth.signInWithCredential(credential);
-
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MainScreen(),
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      if (e.code == 'invalid-verification-code') {
-        showMessage('Invalid OTP. Please check the code.');
-      } else if (e.code == 'session-expired') {
-        showMessage('OTP expired. Please request a new OTP.');
-      } else {
-        showMessage(
-          e.message ?? 'Verification failed',
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      showMessage('Verification failed. Please try again.');
     }
-  }
+  } catch (e) {
+    if (!mounted) return;
 
-  void demoSocialLogin(String provider) {
-    showMessage(
-      '$provider authentication will be connected next.',
-    );
-  }
+    setState(() {
+      isLoading = false;
+    });
 
-  InputDecoration fieldDecoration({
-    required String hint,
-    required IconData icon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(
-        icon,
-        color: darkGold,
-      ),
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 17,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E0E0),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E0E0),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: darkGold,
-          width: 2,
-        ),
-      ),
-    );
+    showMessage('Verification failed. Please try again.');
   }
+}
 
   @override
   Widget build(BuildContext context) {
