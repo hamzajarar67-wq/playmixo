@@ -151,6 +151,15 @@ final TextEditingController passwordController = TextEditingController();
 bool obscurePassword = true;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  @override
+void initState() {
+  super.initState();
+
+  GoogleSignIn.instance.initialize(
+    serverClientId:
+        '249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com',
+  );
+}
 
   String? verificationId;
   int? resendToken;
@@ -491,14 +500,10 @@ Future<void> demoSocialLogin(String provider) async {
   }
 
   try {
-    await GoogleSignIn.instance.initialize(
-  serverClientId:
-      '249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com',
-);
-    final googleUser =
-        await GoogleSignIn.instance.authenticate();
+  final googleUser =
+      await GoogleSignIn.instance.authenticate();
 
-    final googleAuth = googleUser.authentication;
+  final googleAuth = googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
