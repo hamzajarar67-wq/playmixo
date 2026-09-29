@@ -28,10 +28,10 @@ jobs:
           
       - name: Get SHA-1
         run: |
-          mkdir -p "$HOME/.android"
+          mkdir -p "$HOME/.config/.android"
 
           keytool -genkeypair -v \
-            -keystore "$HOME/.android/debug.keystore" \
+            -keystore "$HOME/.config/.android/debug.keystore" \
             -storepass android \
             -alias AndroidDebugKey \
             -keypass android \
