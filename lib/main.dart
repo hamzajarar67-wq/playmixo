@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+/* ================= SPLASH ================= */
+
 class PlaymixoSplash extends StatefulWidget {
   const PlaymixoSplash({super.key});
 
@@ -17,7 +20,7 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const MainScreen(),
+          builder: (_) => const AuthPage(),
         ),
       );
     });
@@ -26,21 +29,20 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Playmixo logo
             Container(
               width: 120,
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFD4AF37),
+                color: darkGold,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withOpacity(0.35),
+                    color: darkGold.withOpacity(0.35),
                     blurRadius: 30,
                     spreadRadius: 5,
                   ),
@@ -57,21 +59,17 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
-
             const Text(
               'PLAYMIXO',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 5,
-                color: Color(0xFFD4AF37),
+                color: darkGold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
               'PLAY • CONNECT • ENJOY',
               style: TextStyle(
@@ -118,6 +116,605 @@ class PlaymixoApp extends StatelessWidget {
         ),
       ),
       home: const PlaymixoSplash(),
+    );
+  }
+}
+
+/* ================= AUTH PAGE ================= */
+
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  bool isLogin = true;
+  bool otpSent = false;
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    otpController.dispose();
+    super.dispose();
+  }
+
+  void sendOtp() {
+    if (phoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your phone number'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      otpSent = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'OTP UI ready — Firebase authentication will be connected next.',
+        ),
+      ),
+    );
+  }
+
+  void continueToApp() {
+    if (otpController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter OTP'),
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
+      ),
+    );
+  }
+
+  void demoSocialLogin(String provider) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$provider login UI ready — real authentication will be connected next.',
+        ),
+      ),
+    );
+  }
+
+  InputDecoration fieldDecoration({
+    required String hint,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(
+        icon,
+        color: darkGold,
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 17,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(
+          color: Color(0xFFE0E0E0),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(
+          color: Color(0xFFE0E0E0),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(
+          color: darkGold,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              /* LOGO */
+
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: black,
+                        border: Border.all(
+                          color: darkGold,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'P',
+                          style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: darkGold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'PLAYMIXO',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 4,
+                        color: black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              Text(
+                isLogin ? 'Welcome Back' : 'Create Account',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: black,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                isLogin
+                    ? 'Sign in to continue to Playmixo'
+                    : 'Create your Playmixo account',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              /* LOGIN / SIGNUP SWITCH */
+
+              Container(
+                height: 52,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F0F0),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isLogin = true;
+                            otpSent = false;
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isLogin ? black : Colors.transparent,
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Log In',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: isLogin ? darkGold : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isLogin = false;
+                            otpSent = false;
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: !isLogin ? black : Colors.transparent,
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: !isLogin
+                                  ? darkGold
+                                  : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /* NAME */
+
+              if (!isLogin) ...[
+                TextField(
+                  controller: nameController,
+                  textInputAction: TextInputAction.next,
+                  decoration: fieldDecoration(
+                    hint: 'Full Name',
+                    icon: Icons.person_outline,
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+
+              /* PHONE */
+
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: fieldDecoration(
+                  hint: 'Phone Number',
+                  icon: Icons.phone_outlined,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              /* OTP */
+
+              if (otpSent) ...[
+                TextField(
+                  controller: otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  decoration: fieldDecoration(
+                    hint: 'Enter OTP',
+                    icon: Icons.lock_outline,
+                  ).copyWith(
+                    counterText: '',
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+
+              /* MAIN BUTTON */
+
+              SizedBox(
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: otpSent ? continueToApp : sendOtp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: black,
+                    foregroundColor: darkGold,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    otpSent
+                        ? 'Verify & Continue'
+                        : 'Send OTP',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              /* OR */
+
+              Row(
+                children: [
+                  const Expanded(
+                    child: Divider(
+                      color: Colors.black12,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        color: Colors.black45,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Divider(
+                      color: Colors.black12,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              /* GOOGLE */
+
+              SizedBox(
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    demoSocialLogin('Google');
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(
+                      color: Colors.black,
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const GoogleIcon(),
+                      const SizedBox(width: 12),
+                      Text(
+                        isLogin
+                            ? 'Continue with Google'
+                            : 'Sign up with Google',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              /* FACEBOOK */
+
+              SizedBox(
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    demoSocialLogin('Facebook');
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(
+                      color: Colors.black,
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const FacebookIcon(),
+                      const SizedBox(width: 12),
+                      Text(
+                        isLogin
+                            ? 'Continue with Facebook'
+                            : 'Sign up with Facebook',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 26),
+
+              /* CREATE ACCOUNT / LOGIN */
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isLogin
+                        ? "Don't have an account?"
+                        : 'Already have an account?',
+                    style: const TextStyle(
+                      color: Colors.black54,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isLogin = !isLogin;
+                        otpSent = false;
+                      });
+                    },
+                    child: Text(
+                      isLogin ? 'Create New Account' : 'Log In',
+                      style: const TextStyle(
+                        color: darkGold,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              const Text(
+                'Demo UI • Real authentication will be connected with Firebase',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.black38,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ================= GOOGLE ICON ================= */
+
+class GoogleIcon extends StatelessWidget {
+  const GoogleIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 25,
+      height: 25,
+      child: CustomPaint(
+        painter: GoogleLogoPainter(),
+      ),
+    );
+  }
+}
+
+class GoogleLogoPainter extends CustomPainter {
+  const GoogleLogoPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.square;
+
+    paint.color = const Color(0xFF4285F4);
+    canvas.drawArc(
+      rect.deflate(3),
+      -0.45,
+      3.2,
+      false,
+      paint,
+    );
+
+    paint.color = const Color(0xFF34A853);
+    canvas.drawArc(
+      rect.deflate(3),
+      2.75,
+      1.15,
+      false,
+      paint,
+    );
+
+    paint.color = const Color(0xFFFBBC05);
+    canvas.drawArc(
+      rect.deflate(3),
+      1.35,
+      1.4,
+      false,
+      paint,
+    );
+
+    paint.color = const Color(0xFFEA4335);
+    canvas.drawArc(
+      rect.deflate(3),
+      -2.9,
+      1.1,
+      false,
+      paint,
+    );
+
+    final blue = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(
+      Rect.fromLTWH(
+        size.width * 0.50,
+        size.height * 0.43,
+        size.width * 0.42,
+        4,
+      ),
+      blue,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+/* ================= FACEBOOK ICON ================= */
+
+class FacebookIcon extends StatelessWidget {
+  const FacebookIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 25,
+      height: 25,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0xFF1877F2),
+      ),
+      alignment: Alignment.center,
+      child: const Text(
+        'f',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          height: 1,
+        ),
+      ),
     );
   }
 }
