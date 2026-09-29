@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "249099517156",
+    "project_id": "playmixo",
+    "storage_bucket": "playmixo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249099517156:android:8b3ffc228b64ae4fbac0f1",
+        "android_client_info": {
+          "package_name": "com.example.playmixo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249099517156-mmb8r0u6fnuhueru8p0036i1jt2g32gu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.playmixo",
+            "certificate_hash": "ed8c9b693cf6a3b1767913ffade00ca641951356"
+          }
+        },
+        {
+          "client_id": "249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOiOoDxyffLR0ZDGFxTml9jpeDP4h8KSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
