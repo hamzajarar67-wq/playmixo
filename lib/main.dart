@@ -874,7 +874,7 @@ if (isLogin) ...[
   SizedBox(
     height: 54,
     child: ElevatedButton(
-      onPressed: isLoading ? null : loginWithEmail,
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: black,
         disabledBackgroundColor: Colors.black54,
