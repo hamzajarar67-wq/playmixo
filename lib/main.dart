@@ -294,6 +294,104 @@ bool obscurePassword = true;
     }
   }
 
+Future<void> createAccount() async {
+  final name = nameController.text.trim();
+  final email = emailController.text.trim();
+  final password = passwordController.text;
+
+  if (name.isEmpty) {
+    showMessage('Please enter your name');
+    return;
+  }
+
+  if (email.isEmpty) {
+    showMessage('Please enter your Gmail');
+    return;
+  }
+
+  if (password.isEmpty) {
+    showMessage('Please enter your password');
+    return;
+  }
+
+  if (password.length < 6) {
+    showMessage('Password must be at least 6 characters');
+    return;
+  }
+
+  FocusScope.of(context).unfocus();
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final userCredential =
+        await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    final user = userCredential.user;
+
+    if (user != null) {
+      await user.updateDisplayName(name);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+        'uid': user.uid,
+        'name': name,
+        'email': email,
+        'phone': '',
+        'updatedAt': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (e.code == 'email-already-in-use') {
+      showMessage('This email is already registered');
+    } else if (e.code == 'invalid-email') {
+      showMessage('Please enter a valid Gmail');
+    } else if (e.code == 'weak-password') {
+      showMessage('Password is too weak');
+    } else {
+      showMessage(e.message ?? 'Account creation failed');
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    showMessage('Account creation failed. Please try again.');
+  }
+}
+
+
+
+  
   Future<void> continueToApp() async {
   final smsCode = otpController.text.trim();
 
