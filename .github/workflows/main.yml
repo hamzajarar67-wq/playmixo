@@ -25,6 +25,11 @@ jobs:
         run: |
           flutter create --platforms=android .
           grep -R "namespace" android/app/build.gradle.kts
+
+      - name: Copy Firebase config
+        run: |
+          mkdir -p android/app
+          cp google-services.json android/app/google-services.json
           
       - name: Get SHA-1
         run: |
