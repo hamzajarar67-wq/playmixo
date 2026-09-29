@@ -26,26 +26,54 @@ jobs:
         run: |
           flutter create --platforms=android .
 
-      - name: Update Kotlin version
+      - name: Configure Kotlin for Firebase Auth
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
-          path = Path("android/settings.gradle")
+          candidates = [
+              Path("android/settings.gradle"),
+              Path("android/settings.gradle.kts"),
+          ]
+
+          path = next((p for p in candidates if p.exists()), None)
+
+          if path is None:
+              raise SystemExit(
+                  "Could not find Android settings.gradle or settings.gradle.kts"
+              )
+
           text = path.read_text()
 
-          text = text.replace(
-              "org.jetbrains.kotlin.android' version '2.1.0'",
-              "org.jetbrains.kotlin.android' version '2.3.0'"
-          )
+          patterns = [
+              (
+                  r"(id\s*\(\s*[\"']org\.jetbrains\.kotlin\.android[\"']\s*\)\s*version\s*[\"'])[^\"']+([\"'])",
+                  r"\g<1>2.3.0\g<2>",
+              ),
+              (
+                  r"(id\s+[\"']org\.jetbrains\.kotlin\.android[\"']\s+version\s+[\"'])[^\"']+([\"'])",
+                  r"\g<1>2.3.0\g<2>",
+              ),
+              (
+                  r"(org\.jetbrains\.kotlin\.android[\"']\s*version\s*[\"'])[^\"']+([\"'])",
+                  r"\g<1>2.3.0\g<2>",
+              ),
+          ]
 
-          text = text.replace(
-              'org.jetbrains.kotlin.android" version "2.1.0"',
-              'org.jetbrains.kotlin.android" version "2.3.0"'
-          )
+          original = text
 
-          path.write_text(text)
-          print(path.read_text())
+          for pattern, replacement in patterns:
+              text = re.sub(pattern, replacement, text)
+
+          if text == original:
+              print("Kotlin version pattern was not found.")
+              print("Android settings file:")
+              print(text)
+          else:
+              path.write_text(text)
+              print(f"Updated Kotlin plugin in {path}")
+              print(path.read_text())
           PY
 
       - name: Install ImageMagick
@@ -174,6 +202,10 @@ jobs:
       - name: Get Flutter packages
         run: |
           flutter pub get
+
+      - name: Clean Flutter Build
+        run: |
+          flutter clean
 
       - name: Build APK
         run: |
