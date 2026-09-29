@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -22,7 +23,13 @@ jobs:
           cache: true
 
       - name: Create Flutter Android project
-        run: flutter create --platforms=android .
+        run: |
+          flutter create --platforms=android .
+
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
 
       - name: Create Playmixo Icon
         run: |
@@ -46,66 +53,94 @@ jobs:
               </linearGradient>
             </defs>
 
-            <!-- Black background -->
-            <rect width="1024" height="1024" rx="190" fill="url(#bg)"/>
+            <!-- Background -->
+            <rect
+              width="1024"
+              height="1024"
+              rx="190"
+              fill="url(#bg)"
+            />
 
             <!-- Gold border -->
-            <rect x="35" y="35" width="954" height="954"
-                  rx="175"
-                  fill="none"
-                  stroke="url(#gold)"
-                  stroke-width="18"/>
+            <rect
+              x="35"
+              y="35"
+              width="954"
+              height="954"
+              rx="175"
+              fill="none"
+              stroke="url(#gold)"
+              stroke-width="18"
+            />
 
             <!-- Crown -->
-            <path d="M365 235 L410 145 L475 205 L512 125
-                     L549 205 L614 145 L659 235 Z"
-                  fill="url(#gold)"
-                  stroke="#FFF0A0"
-                  stroke-width="5"/>
+            <path
+              d="M365 235 L410 145 L475 205 L512 125
+                 L549 205 L614 145 L659 235 Z"
+              fill="url(#gold)"
+              stroke="#FFF0A0"
+              stroke-width="5"
+            />
 
             <!-- P -->
-            <text x="512" y="570"
-                  text-anchor="middle"
-                  font-family="DejaVu Sans"
-                  font-size="430"
-                  font-weight="900"
-                  fill="url(#gold)">P</text>
+            <text
+              x="512"
+              y="570"
+              text-anchor="middle"
+              font-family="DejaVu Sans"
+              font-size="430"
+              font-weight="900"
+              fill="url(#gold)"
+            >P</text>
 
             <!-- Play triangle -->
-            <path d="M485 360 L485 475 L575 417 Z"
-                  fill="#111111"/>
+            <path
+              d="M485 360 L485 475 L575 417 Z"
+              fill="#111111"
+            />
 
             <!-- Orbit -->
-            <ellipse cx="512" cy="500"
-                     rx="330" ry="105"
-                     fill="none"
-                     stroke="url(#gold)"
-                     stroke-width="24"
-                     transform="rotate(-12 512 500)"/>
+            <ellipse
+              cx="512"
+              cy="500"
+              rx="330"
+              ry="105"
+              fill="none"
+              stroke="url(#gold)"
+              stroke-width="24"
+              transform="rotate(-12 512 500)"
+            />
 
             <!-- PLAYMIXO -->
-            <text x="512" y="720"
-                  text-anchor="middle"
-                  font-family="DejaVu Sans"
-                  font-size="105"
-                  font-weight="900"
-                  fill="url(#gold)">PLAYMIXO</text>
+            <text
+              x="512"
+              y="720"
+              text-anchor="middle"
+              font-family="DejaVu Sans"
+              font-size="105"
+              font-weight="900"
+              fill="url(#gold)"
+            >PLAYMIXO</text>
 
             <!-- Tagline -->
-            <text x="512" y="805"
-                  text-anchor="middle"
-                  font-family="DejaVu Sans"
-                  font-size="32"
-                  letter-spacing="8"
-                  fill="#FFFFFF">
-              PLAY • CONNECT • ENJOY
-            </text>
+            <text
+              x="512"
+              y="805"
+              text-anchor="middle"
+              font-family="DejaVu Sans"
+              font-size="32"
+              letter-spacing="8"
+              fill="#FFFFFF"
+            >PLAY • CONNECT • ENJOY</text>
 
           </svg>
           EOF
 
-          convert -background none assets/playmixo_icon.svg \
-            -resize 1024x1024 assets/playmixo_icon.png
+          convert \
+            -background none \
+            assets/playmixo_icon.svg \
+            -resize 1024x1024 \
+            assets/playmixo_icon.png
 
       - name: Add Launcher Icon Package
         run: |
@@ -123,15 +158,17 @@ jobs:
             min_sdk_android: 21
           EOF
 
-      - name: Generate App Icon
+      - name: Generate Playmixo App Icon
         run: |
           dart run flutter_launcher_icons
 
       - name: Get Flutter packages
-        run: flutter pub get
+        run: |
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
