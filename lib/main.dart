@@ -660,7 +660,7 @@ if (!isLogin) ...[
             ),
     ),
   ),
-]
+],
 
 /* PHONE LOGIN */
 
