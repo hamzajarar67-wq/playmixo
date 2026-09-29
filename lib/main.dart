@@ -376,6 +376,51 @@ class _AuthPageState extends State<AuthPage> {
   }
 }
 
+void demoSocialLogin(String provider) {
+  showMessage(
+    '$provider authentication will be connected next.',
+  );
+}
+
+InputDecoration fieldDecoration({
+  required String hint,
+  required IconData icon,
+}) {
+  return InputDecoration(
+    hintText: hint,
+    prefixIcon: Icon(
+      icon,
+      color: darkGold,
+    ),
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: 18,
+      vertical: 17,
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(
+        color: Color(0xFFE0E0E0),
+      ),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(
+        color: Color(0xFFE0E0E0),
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(
+        color: darkGold,
+        width: 2,
+      ),
+    ),
+  );
+}
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
