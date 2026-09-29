@@ -32,10 +32,14 @@ jobs:
           cp "google-services (7).json" android/app/google-services.json
       - name: Install Android NDK
         run: |
-          yes | sdkmanager --licenses || true
-          rm -rf "$ANDROID_SDK_ROOT/ndk/27.0.12077973"
-          sdkmanager --update
-          sdkmanager "ndk;27.0.12077973"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          rm -rf "$ANDROID_HOME/ndk/27.0.12077973"
+
+          "$SDKMANAGER" --update
+          "$SDKMANAGER" "ndk;27.0.12077973"
       - name: Get SHA-1
         run: |
           mkdir -p "$HOME/.config/.android"
