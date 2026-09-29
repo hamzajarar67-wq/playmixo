@@ -499,14 +499,29 @@ Future<void> demoSocialLogin(String provider) async {
     return;
   }
 
-  try {
-  final googleUser =
-      await GoogleSignIn.instance.authenticate();
+  if (isLoading) return;
 
-  final googleAuth = googleUser.authentication;
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final googleSignIn = GoogleSignIn.instance;
+
+    await googleSignIn.signOut();
+
+    final googleUser = await googleSignIn.authenticate();
+
+    final googleAuth = googleUser.authentication;
+
+    final idToken = googleAuth.idToken;
+
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Google ID token was not returned');
+    }
 
     final credential = GoogleAuthProvider.credential(
-      idToken: googleAuth.idToken,
+      idToken: idToken,
     );
 
     final userCredential =
@@ -514,21 +529,27 @@ Future<void> demoSocialLogin(String provider) async {
 
     final user = userCredential.user;
 
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({
-        'uid': user.uid,
-        'name': user.displayName ?? '',
-        'email': user.email ?? '',
-        'phone': user.phoneNumber ?? '',
-        'photoURL': user.photoURL ?? '',
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+    if (user == null) {
+      throw Exception('Firebase Google sign-in failed');
     }
 
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({
+      'uid': user.uid,
+      'name': user.displayName ?? '',
+      'email': user.email ?? '',
+      'phone': user.phoneNumber ?? '',
+      'photoURL': user.photoURL ?? '',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
     if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
 
     Navigator.pushReplacement(
       context,
@@ -539,19 +560,38 @@ Future<void> demoSocialLogin(String provider) async {
   } on FirebaseAuthException catch (e) {
     if (!mounted) return;
 
+    setState(() {
+      isLoading = false;
+    });
+
     showMessage(
       e.message ?? 'Google sign-in failed',
     );
+  } on GoogleSignInException catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    debugPrint('GOOGLE SIGN-IN ERROR: $e');
+
+    showMessage(
+      e.description ?? 'Google sign-in failed',
+    );
   } catch (e) {
-  if (!mounted) return;
+    if (!mounted) return;
 
-  debugPrint('GOOGLE SIGN-IN ERROR: $e');
-debugPrint('GOOGLE SIGN-IN ERROR TYPE: ${e.runtimeType}');
+    setState(() {
+      isLoading = false;
+    });
 
-showMessage(
-  'Google error: $e',
-);
-}
+    debugPrint('GOOGLE SIGN-IN ERROR: $e');
+
+    showMessage(
+      'Google sign-in failed. Please try again.',
+    );
+  }
 }
   
 
