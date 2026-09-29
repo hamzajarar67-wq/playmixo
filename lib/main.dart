@@ -545,9 +545,12 @@ Future<void> demoSocialLogin(String provider) async {
   } catch (e) {
   if (!mounted) return;
 
-  showMessage(
-    'Google error: $e',
-  );
+  debugPrint('GOOGLE SIGN-IN ERROR: $e');
+debugPrint('GOOGLE SIGN-IN ERROR TYPE: ${e.runtimeType}');
+
+showMessage(
+  'Google error: $e',
+);
 }
 }
   
@@ -831,40 +834,47 @@ if (!isLogin) ...[
 
 if (isLogin) ...[
   TextField(
-    controller: phoneController,
-    keyboardType: TextInputType.phone,
-    enabled: !otpSent && !isLoading,
+    controller: emailController,
+    keyboardType: TextInputType.emailAddress,
+    textInputAction: TextInputAction.next,
     decoration: fieldDecoration(
-      hint: 'Phone Number (+971...)',
-      icon: Icons.phone_outlined,
+      hint: 'Gmail',
+      icon: Icons.email_outlined,
     ),
   ),
 
   const SizedBox(height: 14),
 
-  if (otpSent) ...[
-    TextField(
-      controller: otpController,
-      keyboardType: TextInputType.number,
-      maxLength: 6,
-      enabled: !isLoading,
-      decoration: fieldDecoration(
-        hint: 'Enter OTP',
-        icon: Icons.lock_outline,
-      ).copyWith(
-        counterText: '',
+  TextField(
+    controller: passwordController,
+    obscureText: obscurePassword,
+    textInputAction: TextInputAction.done,
+    decoration: fieldDecoration(
+      hint: 'Password',
+      icon: Icons.lock_outline,
+    ).copyWith(
+      suffixIcon: IconButton(
+        onPressed: () {
+          setState(() {
+            obscurePassword = !obscurePassword;
+          });
+        },
+        icon: Icon(
+          obscurePassword
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+          color: darkGold,
+        ),
       ),
     ),
+  ),
 
-    const SizedBox(height: 14),
-  ],
+  const SizedBox(height: 20),
 
   SizedBox(
     height: 54,
     child: ElevatedButton(
-      onPressed: isLoading
-          ? null
-          : (otpSent ? continueToApp : sendOtp),
+      onPressed: isLoading ? null : loginWithEmail,
       style: ElevatedButton.styleFrom(
         backgroundColor: black,
         disabledBackgroundColor: Colors.black54,
@@ -885,11 +895,9 @@ if (isLogin) ...[
                 ),
               ),
             )
-          : Text(
-              otpSent
-                  ? 'Verify & Continue'
-                  : 'Send OTP',
-              style: const TextStyle(
+          : const Text(
+              'Log In',
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
               ),
