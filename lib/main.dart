@@ -534,12 +534,12 @@ Future<void> demoSocialLogin(String provider) async {
       e.message ?? 'Google sign-in failed',
     );
   } catch (e) {
-    if (!mounted) return;
+  if (!mounted) return;
 
-    showMessage(
-      'Google sign-in failed. Please try again.',
-    );
-  }
+  showMessage(
+    'Google error: $e',
+  );
+}
 }
   
 
