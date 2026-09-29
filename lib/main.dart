@@ -568,18 +568,22 @@ Future<void> demoSocialLogin(String provider) async {
       e.message ?? 'Google sign-in failed',
     );
   } on GoogleSignInException catch (e) {
-    if (!mounted) return;
+  if (!mounted) return;
 
-    setState(() {
-      isLoading = false;
-    });
+  setState(() {
+    isLoading = false;
+  });
 
-    debugPrint('GOOGLE SIGN-IN ERROR: $e');
+  debugPrint('================ GOOGLE ERROR ================');
+  debugPrint('Code: ${e.code}');
+  debugPrint('Description: ${e.description}');
+  debugPrint('Details: $e');
+  debugPrint('==============================================');
 
-    showMessage(
-      e.description ?? 'Google sign-in failed',
-    );
-  } catch (e) {
+  showMessage(
+    'Google Error: ${e.code}\n${e.description ?? 'Unknown error'}',
+  );
+} catch (e) {
     if (!mounted) return;
 
     setState(() {
