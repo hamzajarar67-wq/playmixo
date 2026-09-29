@@ -334,21 +334,23 @@ Future<void> createAccount() async {
 
     final user = userCredential.user;
 
-    if (user != null) {
-      await user.updateDisplayName(name);
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({
-        'uid': user.uid,
-        'name': name,
-        'email': email,
-        'phone': '',
-        'updatedAt': FieldValue.serverTimestamp(),
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+    if (user == null) {
+      throw Exception('User creation failed');
     }
+
+    await user.updateDisplayName(name);
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({
+      'uid': user.uid,
+      'name': name,
+      'email': email,
+      'phone': '',
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
 
     if (!mounted) return;
 
