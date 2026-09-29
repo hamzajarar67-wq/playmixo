@@ -24,6 +24,109 @@ jobs:
       - name: Create Flutter Android project
         run: flutter create --platforms=android .
 
+      - name: Create Playmixo Icon
+        run: |
+          mkdir -p assets
+
+          cat > assets/playmixo_icon.svg <<'EOF'
+          <svg width="1024" height="1024" viewBox="0 0 1024 1024"
+               xmlns="http://www.w3.org/2000/svg">
+
+            <defs>
+              <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FFF2A6"/>
+                <stop offset="30%" stop-color="#FFD84A"/>
+                <stop offset="65%" stop-color="#D4AF37"/>
+                <stop offset="100%" stop-color="#8B6508"/>
+              </linearGradient>
+
+              <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#191919"/>
+                <stop offset="100%" stop-color="#000000"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Black background -->
+            <rect width="1024" height="1024" rx="190" fill="url(#bg)"/>
+
+            <!-- Gold border -->
+            <rect x="35" y="35" width="954" height="954"
+                  rx="175"
+                  fill="none"
+                  stroke="url(#gold)"
+                  stroke-width="18"/>
+
+            <!-- Crown -->
+            <path d="M365 235 L410 145 L475 205 L512 125
+                     L549 205 L614 145 L659 235 Z"
+                  fill="url(#gold)"
+                  stroke="#FFF0A0"
+                  stroke-width="5"/>
+
+            <!-- P -->
+            <text x="512" y="570"
+                  text-anchor="middle"
+                  font-family="DejaVu Sans"
+                  font-size="430"
+                  font-weight="900"
+                  fill="url(#gold)">P</text>
+
+            <!-- Play triangle -->
+            <path d="M485 360 L485 475 L575 417 Z"
+                  fill="#111111"/>
+
+            <!-- Orbit -->
+            <ellipse cx="512" cy="500"
+                     rx="330" ry="105"
+                     fill="none"
+                     stroke="url(#gold)"
+                     stroke-width="24"
+                     transform="rotate(-12 512 500)"/>
+
+            <!-- PLAYMIXO -->
+            <text x="512" y="720"
+                  text-anchor="middle"
+                  font-family="DejaVu Sans"
+                  font-size="105"
+                  font-weight="900"
+                  fill="url(#gold)">PLAYMIXO</text>
+
+            <!-- Tagline -->
+            <text x="512" y="805"
+                  text-anchor="middle"
+                  font-family="DejaVu Sans"
+                  font-size="32"
+                  letter-spacing="8"
+                  fill="#FFFFFF">
+              PLAY • CONNECT • ENJOY
+            </text>
+
+          </svg>
+          EOF
+
+          convert -background none assets/playmixo_icon.svg \
+            -resize 1024x1024 assets/playmixo_icon.png
+
+      - name: Add Launcher Icon Package
+        run: |
+          flutter pub add --dev flutter_launcher_icons
+
+      - name: Configure Playmixo App Icon
+        run: |
+          cat > flutter_launcher_icons.yaml <<'EOF'
+          flutter_launcher_icons:
+            android: true
+            ios: false
+            image_path: "assets/playmixo_icon.png"
+            adaptive_icon_background: "#111111"
+            adaptive_icon_foreground: "assets/playmixo_icon.png"
+            min_sdk_android: 21
+          EOF
+
+      - name: Generate App Icon
+        run: |
+          dart run flutter_launcher_icons
+
       - name: Get Flutter packages
         run: flutter pub get
 
