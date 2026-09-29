@@ -141,8 +141,13 @@ class _AuthPageState extends State<AuthPage> {
   bool isLoading = false;
 
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
+final TextEditingController phoneController = TextEditingController();
+final TextEditingController otpController = TextEditingController();
+
+final TextEditingController emailController = TextEditingController();
+final TextEditingController passwordController = TextEditingController();
+
+bool obscurePassword = true;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -570,95 +575,165 @@ InputDecoration fieldDecoration({
 
               const SizedBox(height: 24),
 
-              /* NAME */
+              /* SIGN UP FIELDS */
 
-              if (!isLogin) ...[
-                TextField(
-                  controller: nameController,
-                  textInputAction: TextInputAction.next,
-                  decoration: fieldDecoration(
-                    hint: 'Full Name',
-                    icon: Icons.person_outline,
-                  ),
-                ),
-                const SizedBox(height: 14),
-              ],
+if (!isLogin) ...[
+  TextField(
+    controller: nameController,
+    textInputAction: TextInputAction.next,
+    decoration: fieldDecoration(
+      hint: 'Name',
+      icon: Icons.person_outline,
+    ),
+  ),
 
-              /* PHONE */
+  const SizedBox(height: 14),
 
-              TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                enabled: !otpSent && !isLoading,
-                decoration: fieldDecoration(
-                  hint: 'Phone Number (+971...)',
-                  icon: Icons.phone_outlined,
-                ),
-              ),
+  TextField(
+    controller: emailController,
+    keyboardType: TextInputType.emailAddress,
+    textInputAction: TextInputAction.next,
+    decoration: fieldDecoration(
+      hint: 'Gmail',
+      icon: Icons.email_outlined,
+    ),
+  ),
 
-              const SizedBox(height: 14),
+  const SizedBox(height: 14),
 
-              /* OTP */
+  TextField(
+    controller: passwordController,
+    obscureText: obscurePassword,
+    textInputAction: TextInputAction.done,
+    decoration: fieldDecoration(
+      hint: 'Password',
+      icon: Icons.lock_outline,
+    ).copyWith(
+      suffixIcon: IconButton(
+        onPressed: () {
+          setState(() {
+            obscurePassword = !obscurePassword;
+          });
+        },
+        icon: Icon(
+          obscurePassword
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+          color: darkGold,
+        ),
+      ),
+    ),
+  ),
 
-              if (otpSent) ...[
-                TextField(
-                  controller: otpController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  enabled: !isLoading,
-                  decoration: fieldDecoration(
-                    hint: 'Enter OTP',
-                    icon: Icons.lock_outline,
-                  ).copyWith(
-                    counterText: '',
-                  ),
-                ),
-                const SizedBox(height: 14),
-              ],
+  const SizedBox(height: 20),
 
-              /* MAIN BUTTON */
-
-              SizedBox(
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : (otpSent ? continueToApp : sendOtp),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: black,
-                    disabledBackgroundColor: Colors.black54,
-                    foregroundColor: darkGold,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(
-                              darkGold,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          otpSent
-                              ? 'Verify & Continue'
-                              : 'Send OTP',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+  SizedBox(
+    height: 54,
+    child: ElevatedButton(
+      onPressed: isLoading ? null : createAccount,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: black,
+        disabledBackgroundColor: Colors.black54,
+        foregroundColor: darkGold,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      child: isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  darkGold,
                 ),
               ),
+            )
+          : const Text(
+              'Create Account',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+    ),
+  ),
+]
 
-              const SizedBox(height: 22),
+/* PHONE LOGIN */
 
+if (isLogin) ...[
+  TextField(
+    controller: phoneController,
+    keyboardType: TextInputType.phone,
+    enabled: !otpSent && !isLoading,
+    decoration: fieldDecoration(
+      hint: 'Phone Number (+971...)',
+      icon: Icons.phone_outlined,
+    ),
+  ),
+
+  const SizedBox(height: 14),
+
+  if (otpSent) ...[
+    TextField(
+      controller: otpController,
+      keyboardType: TextInputType.number,
+      maxLength: 6,
+      enabled: !isLoading,
+      decoration: fieldDecoration(
+        hint: 'Enter OTP',
+        icon: Icons.lock_outline,
+      ).copyWith(
+        counterText: '',
+      ),
+    ),
+
+    const SizedBox(height: 14),
+  ],
+
+  SizedBox(
+    height: 54,
+    child: ElevatedButton(
+      onPressed: isLoading
+          ? null
+          : (otpSent ? continueToApp : sendOtp),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: black,
+        disabledBackgroundColor: Colors.black54,
+        foregroundColor: darkGold,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      child: isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  darkGold,
+                ),
+              ),
+            )
+          : Text(
+              otpSent
+                  ? 'Verify & Continue'
+                  : 'Send OTP',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+    ),
+  ),
+],
+
+const SizedBox(height: 22),
               /* OR */
 
               Row(
