@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 /* ================= SPLASH ================= */
 
 class PlaymixoSplash extends StatefulWidget {
@@ -136,10 +137,16 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   bool isLogin = true;
   bool otpSent = false;
+  bool isLoading = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String? verificationId;
+  int? resendToken;
 
   @override
   void dispose() {
@@ -149,54 +156,212 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
-  void sendOtp() {
-    if (phoneController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your phone number'),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      otpSent = true;
-    });
+  void showMessage(String message) {
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'OTP UI ready — Firebase authentication will be connected next.',
-        ),
+      SnackBar(
+        content: Text(message),
       ),
     );
   }
 
-  void continueToApp() {
-    if (otpController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter OTP'),
-        ),
+  String getPhoneNumber() {
+    String phone = phoneController.text.trim();
+
+    // Remove spaces, dashes and brackets.
+    phone = phone.replaceAll(' ', '');
+    phone = phone.replaceAll('-', '');
+    phone = phone.replaceAll('(', '');
+    phone = phone.replaceAll(')', '');
+
+    return phone;
+  }
+
+  Future<void> sendOtp() async {
+    final phoneNumber = getPhoneNumber();
+
+    if (phoneNumber.isEmpty) {
+      showMessage('Please enter your phone number');
+      return;
+    }
+
+    if (!phoneNumber.startsWith('+')) {
+      showMessage(
+        'Please enter your phone number with country code, e.g. +971501234567',
       );
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const MainScreen(),
-      ),
-    );
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          try {
+            await _auth.signInWithCredential(credential);
+
+            if (!mounted) return;
+
+            setState(() {
+              isLoading = false;
+              otpSent = true;
+            });
+
+            showMessage('Phone number verified successfully');
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const MainScreen(),
+              ),
+            );
+          } on FirebaseAuthException catch (e) {
+            if (!mounted) return;
+
+            setState(() {
+              isLoading = false;
+            });
+
+            showMessage(
+              e.message ?? 'Authentication failed',
+            );
+          }
+        },
+
+        verificationFailed: (FirebaseAuthException e) {
+          if (!mounted) return;
+
+          setState(() {
+            isLoading = false;
+          });
+
+          if (e.code == 'invalid-phone-number') {
+            showMessage('The phone number is invalid');
+          } else if (e.code == 'too-many-requests') {
+            showMessage(
+              'Too many requests. Please try again later.',
+            );
+          } else {
+            showMessage(
+              e.message ?? 'Failed to send OTP',
+            );
+          }
+        },
+
+        codeSent: (
+          String verificationIdValue,
+          int? resendTokenValue,
+        ) {
+          if (!mounted) return;
+
+          setState(() {
+            verificationId = verificationIdValue;
+            resendToken = resendTokenValue;
+            otpSent = true;
+            isLoading = false;
+          });
+
+          showMessage('OTP sent successfully');
+        },
+
+        codeAutoRetrievalTimeout: (String verificationIdValue) {
+          verificationId = verificationIdValue;
+        },
+
+        timeout: const Duration(seconds: 60),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      showMessage('Something went wrong. Please try again.');
+    }
+  }
+
+  Future<void> continueToApp() async {
+    final smsCode = otpController.text.trim();
+
+    if (smsCode.isEmpty) {
+      showMessage('Please enter OTP');
+      return;
+    }
+
+    if (smsCode.length != 6) {
+      showMessage('Please enter the 6-digit OTP');
+      return;
+    }
+
+    if (verificationId == null) {
+      showMessage('Please request a new OTP');
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: verificationId!,
+        smsCode: smsCode,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainScreen(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if (e.code == 'invalid-verification-code') {
+        showMessage('Invalid OTP. Please check the code.');
+      } else if (e.code == 'session-expired') {
+        showMessage('OTP expired. Please request a new OTP.');
+      } else {
+        showMessage(
+          e.message ?? 'Verification failed',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      showMessage('Verification failed. Please try again.');
+    }
   }
 
   void demoSocialLogin(String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$provider login UI ready — real authentication will be connected next.',
-        ),
-      ),
+    showMessage(
+      '$provider authentication will be connected next.',
     );
   }
 
@@ -333,6 +498,8 @@ class _AuthPageState extends State<AuthPage> {
                           setState(() {
                             isLogin = true;
                             otpSent = false;
+                            verificationId = null;
+                            otpController.clear();
                           });
                         },
                         child: Container(
@@ -357,6 +524,8 @@ class _AuthPageState extends State<AuthPage> {
                           setState(() {
                             isLogin = false;
                             otpSent = false;
+                            verificationId = null;
+                            otpController.clear();
                           });
                         },
                         child: Container(
@@ -402,8 +571,9 @@ class _AuthPageState extends State<AuthPage> {
               TextField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
+                enabled: !otpSent && !isLoading,
                 decoration: fieldDecoration(
-                  hint: 'Phone Number',
+                  hint: 'Phone Number (+971...)',
                   icon: Icons.phone_outlined,
                 ),
               ),
@@ -417,6 +587,7 @@ class _AuthPageState extends State<AuthPage> {
                   controller: otpController,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
+                  enabled: !isLoading,
                   decoration: fieldDecoration(
                     hint: 'Enter OTP',
                     icon: Icons.lock_outline,
@@ -432,24 +603,39 @@ class _AuthPageState extends State<AuthPage> {
               SizedBox(
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: otpSent ? continueToApp : sendOtp,
+                  onPressed: isLoading
+                      ? null
+                      : (otpSent ? continueToApp : sendOtp),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: black,
+                    disabledBackgroundColor: Colors.black54,
                     foregroundColor: darkGold,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: Text(
-                    otpSent
-                        ? 'Verify & Continue'
-                        : 'Send OTP',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(
+                              darkGold,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          otpSent
+                              ? 'Verify & Continue'
+                              : 'Send OTP',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                 ),
               ),
 
@@ -464,8 +650,8 @@ class _AuthPageState extends State<AuthPage> {
                       color: Colors.black12,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
                       'OR',
                       style: TextStyle(
@@ -489,9 +675,11 @@ class _AuthPageState extends State<AuthPage> {
               SizedBox(
                 height: 52,
                 child: OutlinedButton(
-                  onPressed: () {
-                    demoSocialLogin('Google');
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          demoSocialLogin('Google');
+                        },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     side: const BorderSide(
@@ -527,9 +715,11 @@ class _AuthPageState extends State<AuthPage> {
               SizedBox(
                 height: 52,
                 child: OutlinedButton(
-                  onPressed: () {
-                    demoSocialLogin('Facebook');
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          demoSocialLogin('Facebook');
+                        },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     side: const BorderSide(
@@ -578,6 +768,8 @@ class _AuthPageState extends State<AuthPage> {
                       setState(() {
                         isLogin = !isLogin;
                         otpSent = false;
+                        verificationId = null;
+                        otpController.clear();
                       });
                     },
                     child: Text(
@@ -594,7 +786,7 @@ class _AuthPageState extends State<AuthPage> {
               const SizedBox(height: 8),
 
               const Text(
-                'Demo UI • Real authentication will be connected with Firebase',
+                'Secure phone verification powered by Firebase',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,
@@ -608,6 +800,10 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 }
+
+
+                        
+
 
 /* ================= GOOGLE ICON ================= */
 
