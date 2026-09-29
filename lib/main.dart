@@ -1,13 +1,104 @@
 import 'package:flutter/material.dart';
+class PlaymixoSplash extends StatefulWidget {
+  const PlaymixoSplash({super.key});
+
+  @override
+  State<PlaymixoSplash> createState() => _PlaymixoSplashState();
+}
+
+class _PlaymixoSplashState extends State<PlaymixoSplash> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MainScreen(),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF111111),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Playmixo logo
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFD4AF37),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFD4AF37).withOpacity(0.35),
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  'P',
+                  style: TextStyle(
+                    fontSize: 72,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'PLAYMIXO',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 5,
+                color: Color(0xFFD4AF37),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'PLAY • CONNECT • ENJOY',
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 2,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 void main() {
   runApp(const PlaymixoApp());
 }
 
+/* ================= COLORS ================= */
+
 const gold = Color(0xFFD4AF37);
 const darkGold = Color(0xFFB28A18);
 const black = Color(0xFF111111);
 const bg = Color(0xFFF6F6F4);
+
+/* ================= APP ================= */
 
 class PlaymixoApp extends StatelessWidget {
   const PlaymixoApp({super.key});
@@ -26,7 +117,7 @@ class PlaymixoApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      home: const MainScreen(),
+      home: const PlaymixoSplash(),
     );
   }
 }
@@ -121,57 +212,276 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      title: 'Playmixo',
+    return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         children: [
-          const WelcomeCard(),
-          const SizedBox(height: 22),
-
-          const SectionTitle('New Board'),
-          const SizedBox(height: 10),
-          const BigFeatureCard(
-            icon: Icons.grid_view_rounded,
-            title: 'New Board',
-            subtitle: 'Explore the new board',
+          Row(
+            children: [
+              const Text(
+                '♛',
+                style: TextStyle(
+                  color: gold,
+                  fontSize: 35,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 7),
+              const Expanded(
+                child: Text(
+                  'Playmixo',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.notifications_none_rounded),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 18),
-          const SectionTitle('New Card'),
-          const SizedBox(height: 10),
-          const BigFeatureCard(
-            icon: Icons.style_rounded,
-            title: 'New Card',
-            subtitle: 'Discover new cards',
+          const SizedBox(height: 4),
+
+          /* WELCOME */
+          Container(
+            height: 82,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: black,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: gold, width: 1),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 59,
+                  height: 59,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black,
+                    border: Border.all(color: gold, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: gold,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome to',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'PLAYMIXO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: gold,
+                  size: 28,
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 18),
-          const SectionTitle('New Card Box'),
-          const SizedBox(height: 10),
-          const BigFeatureCard(
-            icon: Icons.inventory_2_rounded,
-            title: 'New Card Box',
-            subtitle: 'Open your card box',
+          const SizedBox(height: 12),
+
+          /* NEW EVENT */
+          Container(
+            height: 94,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: black,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF2B2B2B)),
+            ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'New Event',
+                        style: TextStyle(
+                          color: gold,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Big Rewards Await You!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(height: 7),
+                      SmallGoldButton(text: 'Join Now'),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.card_giftcard_rounded,
+                  color: gold,
+                  size: 58,
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
 
-          const HomeAction(
-            icon: Icons.celebration_rounded,
-            title: 'New Event',
+          /* FIRST ROW */
+          Row(
+            children: const [
+              Expanded(
+                child: HomeVisualCard(
+                  title: 'New Board',
+                  visual: BoardVisual(),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: HomeVisualCard(
+                  title: 'New Card',
+                  visual: CardVisual(),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: HomeVisualCard(
+                  title: 'New Card Box',
+                  visual: BoxVisual(),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: HomeVisualCard(
+                  title: 'New Event',
+                  visual: GiftVisual(),
+                ),
+              ),
+            ],
           ),
-          const HomeAction(
-            icon: Icons.card_giftcard_rounded,
-            title: 'Free Reward',
+
+          const SizedBox(height: 9),
+
+          /* SECOND ROW */
+          Row(
+            children: const [
+              Expanded(
+                child: HomeIconCard(
+                  title: 'Free Reward',
+                  icon: Icons.card_giftcard_rounded,
+                ),
+              ),
+              SizedBox(width: 9),
+              Expanded(
+                child: HomeIconCard(
+                  title: 'Daily Task',
+                  icon: Icons.assignment_turned_in_rounded,
+                ),
+              ),
+              SizedBox(width: 9),
+              Expanded(
+                child: HomeIconCard(
+                  title: 'Update',
+                  icon: Icons.campaign_rounded,
+                ),
+              ),
+            ],
           ),
-          const HomeAction(
-            icon: Icons.task_alt_rounded,
-            title: 'Daily Task Reward',
+
+          const SizedBox(height: 14),
+
+          Row(
+            children: const [
+              Text(
+                'Featured',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Spacer(),
+              Text(
+                'See All ›',
+                style: TextStyle(
+                  color: darkGold,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
-          const HomeAction(
-            icon: Icons.campaign_rounded,
-            title: 'Update',
+
+          const SizedBox(height: 8),
+
+          /* FEATURED */
+          Container(
+            height: 92,
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: black,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Lucky Spin Event',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Spin & Win Amazing Rewards!',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                        ),
+                      ),
+                      SizedBox(height: 7),
+                      SmallGoldButton(text: 'Join Now'),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.casino_rounded,
+                  color: gold,
+                  size: 60,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -179,60 +489,282 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class WelcomeCard extends StatelessWidget {
-  const WelcomeCard({super.key});
+/* ================= HOME VISUAL CARDS ================= */
+
+class HomeVisualCard extends StatelessWidget {
+  final String title;
+  final Widget visual;
+
+  const HomeVisualCard({
+    super.key,
+    required this.title,
+    required this.visual,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      height: 112,
+      padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
-        color: black,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: gold, width: 1.3),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: gold,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.auto_awesome,
-              color: black,
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome to',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
-                ),
-                SizedBox(height: 3),
-                Text(
-                  'PLAYMIXO',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
+          Expanded(child: Center(child: visual)),
+          const SizedBox(height: 3),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class HomeIconCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+
+  const HomeIconCard({
+    super.key,
+    required this.title,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 91,
+      padding: const EdgeInsets.all(7),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: gold, size: 30),
+          const SizedBox(height: 7),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ================= REAL-LOOKING CARD ================= */
+
+class CardVisual extends StatelessWidget {
+  const CardVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 58,
+      height: 55,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 8,
+            top: 5,
+            child: Transform.rotate(
+              angle: -0.18,
+              child: _PlayingCard(
+                symbol: '♠',
+                number: 'A',
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            top: 1,
+            child: Transform.rotate(
+              angle: 0.08,
+              child: _PlayingCard(
+                symbol: '♠',
+                number: 'A',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayingCard extends StatelessWidget {
+  final String symbol;
+  final String number;
+
+  const _PlayingCard({
+    required this.symbol,
+    required this.number,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 35,
+      height: 49,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: Colors.black12),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 3,
+            offset: Offset(1, 2),
+            color: Colors.black26,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            number,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            symbol,
+            style: const TextStyle(
+              fontSize: 20,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ================= REAL-LOOKING BOARD ================= */
+
+class BoardVisual extends StatelessWidget {
+  const BoardVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60,
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: gold, width: 2),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 4,
+            offset: Offset(1, 2),
+            color: Colors.black26,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: 43,
+          height: 31,
+          decoration: BoxDecoration(
+            color: const Color(0xFF302817),
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: gold),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.star_rounded,
+              color: gold,
+              size: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ================= REAL-LOOKING BOX ================= */
+
+class BoxVisual extends StatelessWidget {
+  const BoxVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 59,
+      height: 54,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 9,
+            left: 5,
+            child: Container(
+              width: 50,
+              height: 39,
+              decoration: BoxDecoration(
+                color: const Color(0xFF181818),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(color: gold, width: 1.5),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.workspace_premium_rounded,
+                  color: gold,
+                  size: 25,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 3,
+            left: 8,
+            child: Container(
+              width: 44,
+              height: 11,
+              decoration: BoxDecoration(
+                color: const Color(0xFF242424),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: gold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ================= GIFT ================= */
+
+class GiftVisual extends StatelessWidget {
+  const GiftVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(
+      Icons.card_giftcard_rounded,
+      color: gold,
+      size: 42,
     );
   }
 }
@@ -244,46 +776,85 @@ class RoomsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      title: 'Room',
-      child: DefaultTabController(
-        length: 3,
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const TabBar(
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  color: black,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: black,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: gold,
+                    size: 21,
+                  ),
                 ),
-                labelColor: gold,
-                unselectedLabelColor: Colors.black54,
-                tabs: [
-                  Tab(text: 'All'),
-                  Tab(text: 'Popular'),
-                  Tab(text: 'My Room'),
-                ],
-              ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Room',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.search_rounded),
+              ],
             ),
-            const SizedBox(height: 12),
-            const Expanded(
-              child: TabBarView(
+          ),
+
+          DefaultTabController(
+            length: 3,
+            child: Expanded(
+              child: Column(
                 children: [
-                  RoomList(),
-                  RoomList(popular: true),
-                  RoomList(myRoom: true),
+                  Container(
+                    height: 52,
+                    margin: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    child: const TabBar(
+                      dividerColor: Colors.transparent,
+                      indicator: BoxDecoration(
+                        color: black,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(13),
+                        ),
+                      ),
+                      labelColor: gold,
+                      unselectedLabelColor: Colors.black54,
+                      tabs: [
+                        Tab(text: 'All'),
+                        Tab(text: 'Popular'),
+                        Tab(text: 'My Room'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 9),
+                  const Expanded(
+                    child: TabBarView(
+                      children: [
+                        RoomList(),
+                        RoomList(popular: true),
+                        RoomList(myRoom: true),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -301,63 +872,141 @@ class RoomList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rooms = [
+      ('Tash Lovers', '128 online', Icons.style_rounded),
+      ('Chill Zone', '95 online', Icons.workspace_premium_rounded),
+      ('Friends Room', '76 online', Icons.groups_rounded),
+      ('VIP Room', '54 online', Icons.emoji_events_rounded),
+      ('Fun Time', '41 online', Icons.casino_rounded),
+    ];
+
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-      itemCount: 6,
+      padding: const EdgeInsets.fromLTRB(18, 4, 18, 20),
+      itemCount: rooms.length,
       itemBuilder: (context, index) {
+        final room = rooms[index];
+
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(13),
+          height: 80,
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE5E5E5)),
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(
+              color: const Color(0xFFE0E0E0),
+            ),
           ),
           child: Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 61,
+                height: 61,
                 decoration: BoxDecoration(
                   color: black,
-                  borderRadius: BorderRadius.circular(17),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: gold,
+                    width: 1,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.mic,
+                child: Icon(
+                  room.$3,
                   color: gold,
+                  size: 31,
                 ),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       myRoom
-                          ? 'My Room ${index + 1}'
-                          : 'Playmixo Room ${index + 1}',
+                          ? 'My ${room.$1}'
+                          : room.$1,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      popular
-                          ? 'Popular • ${20 + index} people'
-                          : '${8 + index} people',
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12,
-                      ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.local_fire_department_rounded,
+                          size: 14,
+                          color: gold,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          room.$2,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.person_rounded,
+                          size: 13,
+                          color: Colors.black45,
+                        ),
+                        const SizedBox(width: 2),
+                        const Text(
+                          '2 - 4 Players',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 15,
-                color: darkGold,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (popular || index == 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3E8B9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        index == 1 ? 'Hot' : 'Popular',
+                        style: const TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 58,
+                    height: 27,
+                    decoration: BoxDecoration(
+                      color: black,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Join',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -374,42 +1023,173 @@ class GamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      title: 'Tash',
+    return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        padding: const EdgeInsets.fromLTRB(18, 17, 18, 20),
         children: [
-          const GameHeader(),
-          const SizedBox(height: 22),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: black,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: gold,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Tash',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
 
-          const SectionTitle('Players'),
+          const SizedBox(height: 14),
+
+          /* PLAY TASH HEADER */
+          Container(
+            height: 147,
+            decoration: BoxDecoration(
+              color: black,
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: gold,
+                width: 1.4,
+              ),
+            ),
+            child: Stack(
+              children: [
+                const Positioned(
+                  left: 22,
+                  top: 18,
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: gold,
+                    size: 27,
+                  ),
+                ),
+                const Positioned(
+                  right: 22,
+                  top: 18,
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: gold,
+                    size: 27,
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.style_rounded,
+                        color: gold,
+                        size: 40,
+                      ),
+                      SizedBox(height: 7),
+                      Text(
+                        'Play Tash',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Classic • Fun • Challenge',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          const Text(
+            'Players',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+
           const SizedBox(height: 10),
 
           Row(
             children: const [
-              Expanded(child: PlayerCard('1 Player')),
+              Expanded(
+                child: PlayerVisualCard(
+                  title: '1 Player',
+                  count: 1,
+                ),
+              ),
               SizedBox(width: 10),
-              Expanded(child: PlayerCard('2 Players')),
+              Expanded(
+                child: PlayerVisualCard(
+                  title: '2 Players',
+                  count: 2,
+                ),
+              ),
             ],
           ),
 
           const SizedBox(height: 10),
 
-          const PlayerCard('4 Players'),
-
-          const SizedBox(height: 22),
-
-          const GameOption(
-            icon: Icons.style_rounded,
-            title: 'Tash Card',
+          const PlayerVisualCard(
+            title: '4 Players',
+            count: 4,
           ),
-          const GameOption(
-            icon: Icons.grid_on_rounded,
-            title: 'Board',
+
+          const SizedBox(height: 18),
+
+          const Text(
+            'Game Items',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const GameOption(
-            icon: Icons.inventory_2_rounded,
-            title: 'Box',
+
+          const SizedBox(height: 10),
+
+          Row(
+            children: const [
+              Expanded(
+                child: GameVisualItem(
+                  title: 'Tash Card',
+                  visual: CardVisual(),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: GameVisualItem(
+                  title: 'Board',
+                  visual: BoardVisual(),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: GameVisualItem(
+                  title: 'Box',
+                  visual: BoxVisual(),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -417,104 +1197,97 @@ class GamePage extends StatelessWidget {
   }
 }
 
-class GameHeader extends StatelessWidget {
-  const GameHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 125,
-      decoration: BoxDecoration(
-        color: black,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: gold, width: 1.3),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.style_rounded, color: gold, size: 38),
-            SizedBox(height: 7),
-            Text(
-              'TASH CARD',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PlayerCard extends StatelessWidget {
+class PlayerVisualCard extends StatelessWidget {
   final String title;
+  final int count;
 
-  const PlayerCard(this.title, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 82,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(19),
-        border: Border.all(color: gold, width: 1.2),
-      ),
-      child: Center(
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class GameOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-
-  const GameOption({
+  const PlayerVisualCard({
     super.key,
-    required this.icon,
     required this.title,
+    required this.count,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 11),
-      padding: const EdgeInsets.all(16),
+      height: 105,
       decoration: BoxDecoration(
-        color: black,
-        borderRadius: BorderRadius.circular(19),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFE0D6AD),
+        ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: gold, size: 27),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 42,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                count,
+                (index) => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2),
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: 25,
+                    color: black,
+                  ),
+                ),
               ),
             ),
           ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: gold,
-            size: 15,
+          const SizedBox(height: 7),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GameVisualItem extends StatelessWidget {
+  final String title;
+  final Widget visual;
+
+  const GameVisualItem({
+    super.key,
+    required this.title,
+    required this.visual,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 132,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: const Color(0xFFE0D6AD),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 70,
+            child: Center(child: visual),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ],
       ),
@@ -523,6 +1296,7 @@ class GameOption extends StatelessWidget {
 }
 
 /* ================= WALLET ================= */
+/* USER SAID DO NOT CHANGE */
 
 class WalletPage extends StatelessWidget {
   const WalletPage({super.key});
@@ -612,6 +1386,7 @@ class WalletBalance extends StatelessWidget {
 }
 
 /* ================= PROFILE ================= */
+/* USER SAID DO NOT CHANGE */
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -731,7 +1506,11 @@ class SettingsPage extends StatelessWidget {
           SettingItem(Icons.language, 'Language'),
           SettingItem(Icons.help_outline, 'Help Center'),
           SettingItem(Icons.logout, 'Log Out'),
-          SettingItem(Icons.delete_outline, 'Delete Account', danger: true),
+          SettingItem(
+            Icons.delete_outline,
+            'Delete Account',
+            danger: true,
+          ),
         ],
       ),
     );
@@ -836,126 +1615,33 @@ class AppPage extends StatelessWidget {
   }
 }
 
-class SectionTitle extends StatelessWidget {
-  final String title;
+/* ================= SMALL BUTTON ================= */
 
-  const SectionTitle(this.title, {super.key});
+class SmallGoldButton extends StatelessWidget {
+  final String text;
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 19,
-        fontWeight: FontWeight.w900,
-      ),
-    );
-  }
-}
-
-class BigFeatureCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const BigFeatureCard({
+  const SmallGoldButton({
     super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.text,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(17),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 5,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(21),
-        border: Border.all(color: const Color(0xFFE1E1E1)),
+        color: gold,
+        borderRadius: BorderRadius.circular(9),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: black,
-              borderRadius: BorderRadius.circular(17),
-            ),
-            child: Icon(
-              icon,
-              color: gold,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 15,
-            color: darkGold,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HomeAction extends StatelessWidget {
-  final IconData icon;
-  final String title;
-
-  const HomeAction({
-    super.key,
-    required this.icon,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: black,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        leading: Icon(icon, color: gold),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios_rounded,
-          color: gold,
-          size: 15,
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: black,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );
