@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 /* ================= SPLASH ================= */
 
 class PlaymixoSplash extends StatefulWidget {
@@ -481,11 +482,70 @@ Future<void> createAccount() async {
   }
 }
 
-void demoSocialLogin(String provider) {
-  showMessage(
-    '$provider authentication will be connected next.',
-  );
+Future<void> demoSocialLogin(String provider) async {
+  if (provider != 'Google') {
+    showMessage(
+      '$provider authentication will be connected next.',
+    );
+    return;
+  }
+
+  try {
+    final GoogleSignInAccount? googleUser =
+        await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      return;
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential =
+        await _auth.signInWithCredential(credential);
+
+    final user = userCredential.user;
+
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({
+        'uid': user.uid,
+        'name': user.displayName ?? '',
+        'email': user.email ?? '',
+        'phone': user.phoneNumber ?? '',
+        'photoURL': user.photoURL ?? '',
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+
+    showMessage(
+      e.message ?? 'Google sign-in failed',
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    showMessage('Google sign-in failed. Please try again.');
+  }
 }
+  
 
 InputDecoration fieldDecoration({
   required String hint,
