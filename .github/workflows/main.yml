@@ -25,6 +25,11 @@ jobs:
         run: |
           flutter create --platforms=android .
           grep -R "namespace" android/app/build.gradle.kts
+          
+      - name: Get SHA-1
+        run: |
+           cd android
+           ./gradlew signingReport
 
       - name: Configure Kotlin
         run: |
