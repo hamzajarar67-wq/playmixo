@@ -491,18 +491,12 @@ Future<void> demoSocialLogin(String provider) async {
   }
 
   try {
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn().signIn();
+    final googleUser =
+        await GoogleSignIn.instance.authenticate();
 
-    if (googleUser == null) {
-      return;
-    }
-
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final googleAuth = googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
@@ -542,7 +536,9 @@ Future<void> demoSocialLogin(String provider) async {
   } catch (e) {
     if (!mounted) return;
 
-    showMessage('Google sign-in failed. Please try again.');
+    showMessage(
+      'Google sign-in failed. Please try again.',
+    );
   }
 }
   
