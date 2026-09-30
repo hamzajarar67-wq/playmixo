@@ -3195,19 +3195,21 @@ class _PrivacyPageState extends State<PrivacyPage> {
     return AppPage(
       title: 'Privacy',
       child: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: gold,
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                4,
-                16,
-                24,
-              ),
-              children: [
+    ? const Center(
+        child: CircularProgressIndicator(
+          color: gold,
+        ),
+      )
+    : Container(
+        color: Colors.white,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            4,
+            16,
+            24,
+          ),
+          children: [
                 PrivacyOptionBox(
                   title: 'Profile Visitors',
                   value: profileVisitors,
@@ -3252,18 +3254,19 @@ class _PrivacyPageState extends State<PrivacyPage> {
                   },
                 ),
 
-                PrivacyOptionBox(
-                  title: 'Online Status',
-                  value: onlineStatus,
-                  onChanged: (value) {
-                    _changeSetting(
-                      'onlineStatus',
-                      value,
-                    );
-                  },
-                ),
+PrivacyOptionBox(
+  title: 'Online Status',
+  value: onlineStatus,
+  onChanged: (value) {
+    _changeSetting(
+      'onlineStatus',
+      value,
+    );
+  },
+),
               ],
             ),
+          ),
     );
   }
 }
