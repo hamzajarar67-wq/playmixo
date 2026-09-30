@@ -405,6 +405,88 @@ Future<void> createAccount() async {
 }
 
 
+Future<void> loginUser() async {
+  if (isLoading) return;
+
+  final email = emailController.text.trim();
+  final password = passwordController.text;
+
+  if (email.isEmpty || password.isEmpty) {
+    showMessage('Email and password are required.');
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final userCredential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    final user = userCredential.user;
+
+    if (user == null) {
+      throw Exception('Login failed');
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    String message;
+
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+        message = 'Email or password is incorrect.';
+        break;
+      case 'invalid-email':
+        message = 'Please enter a valid email.';
+        break;
+      case 'user-disabled':
+        message = 'This account has been disabled.';
+        break;
+      case 'too-many-requests':
+        message = 'Too many attempts. Please try again later.';
+        break;
+      default:
+        message = e.message ?? 'Login failed. Please try again.';
+    }
+
+    showMessage(message);
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    showMessage('Login failed. Please try again.');
+  }
+}
+
+
+
+  
 
   
   Future<void> continueToApp() async {
@@ -919,7 +1001,7 @@ if (isLogin) ...[
   SizedBox(
     height: 54,
     child: ElevatedButton(
-      onPressed: () {},
+      onPressed: isLoading ? null : loginUser,
       style: ElevatedButton.styleFrom(
         backgroundColor: black,
         disabledBackgroundColor: Colors.black54,
