@@ -111,23 +111,57 @@ const bg = Color(0xFFF6F6F4);
 class PlaymixoApp extends StatelessWidget {
   const PlaymixoApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Playmixo',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: bg,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: gold,
-          brightness: Brightness.light,
-        ),
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'Playmixo',
+
+    theme: ThemeData(
+      useMaterial3: true,
+      scaffoldBackgroundColor: bg,
+      fontFamily: 'Roboto',
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: gold,
+        brightness: Brightness.light,
       ),
-      home: const PlaymixoSplash(),
-    );
-  }
+    ),
+
+    // PLAYMIXO MASTER SIZE: 480dp
+    builder: (context, child) {
+      final media = MediaQuery.of(context);
+
+      const designWidth = 480.0;
+      final actualWidth = media.size.width;
+      final scale = actualWidth / designWidth;
+
+      final controlledWidth = actualWidth / scale;
+      final controlledHeight = media.size.height / scale;
+
+      return MediaQuery(
+        data: media.copyWith(
+          size: Size(
+            controlledWidth,
+            controlledHeight,
+          ),
+        ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Transform.scale(
+            scale: scale,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: controlledWidth,
+              height: controlledHeight,
+              child: child,
+            ),
+          ),
+        ),
+      );
+    },
+
+    home: const PlaymixoSplash(),
+  );
 }
 
 /* ================= AUTH PAGE ================= */
