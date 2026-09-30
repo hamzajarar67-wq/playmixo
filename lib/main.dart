@@ -510,6 +510,7 @@ Future<void> demoSocialLogin(String provider) async {
 
   try {
     final googleSignIn = GoogleSignIn.instance;
+    await _initializeGoogleSignIn();
 
     // Do NOT sign out before authentication.
     // This can trigger Account reauth failed [16].
