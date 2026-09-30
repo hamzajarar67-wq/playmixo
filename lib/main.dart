@@ -14,23 +14,23 @@ class PlaymixoSplash extends StatefulWidget {
 
 class _PlaymixoSplashState extends State<PlaymixoSplash> {
   @override
-  void initState() {
-    super.initState();
+void initState() {
+  super.initState();
 
-    Future.delayed(const Duration(seconds: 2), () {
-  if (!mounted) return;
+  Future.delayed(const Duration(seconds: 2), () {
+    if (!mounted) return;
 
-  final user = FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser;
 
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => user != null
-          ? const MainScreen()
-          : const AuthPage(),
-    ),
-  );
-);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => user != null
+            ? const MainScreen()
+            : const AuthPage(),
+      ),
+    );
+  });
 }
   @override
   Widget build(BuildContext context) {
