@@ -154,8 +154,11 @@ bool obscurePassword = true;
   @override
 void initState() {
   super.initState();
+  _initializeGoogleSignIn();
+}
 
-  GoogleSignIn.instance.initialize(
+Future<void> _initializeGoogleSignIn() async {
+  await GoogleSignIn.instance.initialize(
     serverClientId:
         '249099517156-74c82t7gorpot3fdd6dhtv7apk893ral.apps.googleusercontent.com',
   );
