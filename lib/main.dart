@@ -1890,13 +1890,13 @@ class _RealCard extends StatelessWidget {
         border: Border.all(
           color: const Color(0xFFBDB8AA),
         ),
-        boxShadow: const [
-          BoxShadow(
-            Colors.black.withValues(alpha: 0.35)
-            blurRadius: 5,
-            offset: Offset(2, 3),
-          ),
-        ],
+        boxShadow: [
+  BoxShadow(
+    color: Colors.black.withValues(alpha: 0.35),
+    blurRadius: 5,
+    offset: Offset(2, 3),
+  ),
+],
       ),
       padding: const EdgeInsets.all(3),
       child: Column(
@@ -2604,34 +2604,29 @@ class GamePage extends StatelessWidget {
           const SizedBox(height: 10),
 
           Row(
-            children: const [
-              Expanded(
-                child: GameVisualItem(
-                  title: 'Tash Card',
-                  visual: CardVisual(),
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: GameVisualItem(
-                  title: 'Board',
-                  visual: BoardVisual(),
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: GameVisualItem(
-                  title: 'Box',
-                  visual: BoxVisual(),
-                ),
-              ),
-            ],
-          ),
-        ],
+  children: [
+    Expanded(
+      child: GameVisualItem(
+        title: 'Tash Card',
+        visual: CardVisual(),
       ),
-    );
-  }
-}
+    ),
+    SizedBox(width: 10),
+    Expanded(
+      child: GameVisualItem(
+        title: 'Board',
+        visual: BoardVisual(),
+      ),
+    ),
+    SizedBox(width: 10),
+    Expanded(
+      child: GameVisualItem(
+        title: 'Box',
+        visual: BoxVisual(),
+      ),
+    ),
+  ],
+),
 
 class PlayerVisualCard extends StatelessWidget {
   final String title;
