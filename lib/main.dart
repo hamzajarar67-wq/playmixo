@@ -18,17 +18,20 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
     super.initState();
 
     Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
+  if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AuthPage(),
-        ),
-      );
-    });
-  }
+  final user = FirebaseAuth.instance.currentUser;
 
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => user != null
+          ? const MainScreen()
+          : const AuthPage(),
+    ),
+  );
+);
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
