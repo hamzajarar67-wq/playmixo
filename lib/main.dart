@@ -2927,6 +2927,8 @@ class ProfileStat extends StatelessWidget {
 
 /* ================= SETTINGS ================= */
 
+/* ================= SETTINGS ================= */
+
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -2936,13 +2938,41 @@ class SettingsPage extends StatelessWidget {
       title: 'Setting',
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-        children: const [
-          SettingItem(Icons.lock_outline, 'Privacy'),
-          SettingItem(Icons.person_outline, 'Account'),
-          SettingItem(Icons.language, 'Language'),
-          SettingItem(Icons.help_outline, 'Help Center'),
-          SettingItem(Icons.logout, 'Log Out'),
+        children: [
           SettingItem(
+            Icons.lock_outline,
+            'Privacy',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyPage(),
+                ),
+              );
+            },
+          ),
+
+          const SettingItem(
+            Icons.person_outline,
+            'Account',
+          ),
+
+          const SettingItem(
+            Icons.language,
+            'Language',
+          ),
+
+          const SettingItem(
+            Icons.help_outline,
+            'Help Center',
+          ),
+
+          const SettingItem(
+            Icons.logout,
+            'Log Out',
+          ),
+
+          const SettingItem(
             Icons.delete_outline,
             'Delete Account',
             danger: true,
@@ -2953,16 +2983,21 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
+
+/* ================= SETTING ITEM ================= */
+
 class SettingItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final bool danger;
+  final VoidCallback? onTap;
 
   const SettingItem(
     this.icon,
     this.title, {
     super.key,
     this.danger = false,
+    this.onTap,
   });
 
   @override
@@ -2972,11 +3007,16 @@ class SettingItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(19),
-        border: Border.all(color: const Color(0xFFE5E5E5)),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 17, vertical: 3),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 17,
+          vertical: 3,
+        ),
         leading: Icon(
           icon,
           color: danger ? Colors.red : darkGold,
@@ -2992,6 +3032,380 @@ class SettingItem extends StatelessWidget {
           Icons.arrow_forward_ios_rounded,
           size: 15,
           color: Colors.black45,
+        ),
+      ),
+    );
+  }
+}
+
+
+/* ================= PRIVACY PAGE ================= */
+
+class PrivacyPage extends StatefulWidget {
+  const PrivacyPage({super.key});
+
+  @override
+  State<PrivacyPage> createState() => _PrivacyPageState();
+}
+
+class _PrivacyPageState extends State<PrivacyPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
+
+  bool profileVisitors = false;
+  bool privateProfile = false;
+  bool doNotFollow = false;
+  bool doNotSendRequest = false;
+  bool onlineStatus = true;
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacySettings();
+  }
+
+  Future<void> _loadPrivacySettings() async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return;
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = snapshot.data();
+
+      if (!mounted) return;
+
+      setState(() {
+        profileVisitors =
+            data?['profileVisitors'] as bool? ?? false;
+
+        privateProfile =
+            data?['privateProfile'] as bool? ?? false;
+
+        doNotFollow =
+            data?['doNotFollow'] as bool? ?? false;
+
+        doNotSendRequest =
+            data?['doNotSendRequest'] as bool? ?? false;
+
+        onlineStatus =
+            data?['onlineStatus'] as bool? ?? true;
+
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Privacy settings could not be loaded.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _savePrivacySetting(
+    String field,
+    bool value,
+  ) async {
+    final user = _auth.currentUser;
+
+    if (user == null) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .set(
+        {
+          field: value,
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not save privacy setting.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _changeSetting(
+    String field,
+    bool value,
+  ) async {
+    setState(() {
+      switch (field) {
+        case 'profileVisitors':
+          profileVisitors = value;
+          break;
+
+        case 'privateProfile':
+          privateProfile = value;
+          break;
+
+        case 'doNotFollow':
+          doNotFollow = value;
+          break;
+
+        case 'doNotSendRequest':
+          doNotSendRequest = value;
+          break;
+
+        case 'onlineStatus':
+          onlineStatus = value;
+          break;
+      }
+    });
+
+    await _savePrivacySetting(
+      field,
+      value,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Privacy',
+      child: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: gold,
+              ),
+            )
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                4,
+                16,
+                24,
+              ),
+              children: [
+                PrivacyOptionBox(
+                  title: 'Profile Visitors',
+                  value: profileVisitors,
+                  onChanged: (value) {
+                    _changeSetting(
+                      'profileVisitors',
+                      value,
+                    );
+                  },
+                ),
+
+                PrivacyOptionBox(
+                  title: 'Private Profile',
+                  value: privateProfile,
+                  onChanged: (value) {
+                    _changeSetting(
+                      'privateProfile',
+                      value,
+                    );
+                  },
+                ),
+
+                PrivacyOptionBox(
+                  title: 'Do Not Follow',
+                  value: doNotFollow,
+                  onChanged: (value) {
+                    _changeSetting(
+                      'doNotFollow',
+                      value,
+                    );
+                  },
+                ),
+
+                PrivacyOptionBox(
+                  title: 'Do Not Send Request',
+                  value: doNotSendRequest,
+                  onChanged: (value) {
+                    _changeSetting(
+                      'doNotSendRequest',
+                      value,
+                    );
+                  },
+                ),
+
+                PrivacyOptionBox(
+                  title: 'Online Status',
+                  value: onlineStatus,
+                  onChanged: (value) {
+                    _changeSetting(
+                      'onlineStatus',
+                      value,
+                    );
+                  },
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+
+/* ================= PRIVACY OPTION BOX ================= */
+
+class PrivacyOptionBox extends StatelessWidget {
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const PrivacyOptionBox({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 76,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: black,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+
+          PrivacySwitch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/* ================= CUSTOM PRIVACY SWITCH ================= */
+
+class PrivacySwitch extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const PrivacySwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onChanged(!value);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(
+          milliseconds: 180,
+        ),
+        curve: Curves.easeOut,
+        width: 106,
+        height: 46,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 4,
+        ),
+        decoration: BoxDecoration(
+          color: value ? black : Colors.red,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: value ? black : Colors.red,
+            width: 1.5,
+          ),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedAlign(
+              duration: const Duration(
+                milliseconds: 180,
+              ),
+              curve: Curves.easeOut,
+              alignment: value
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+
+            Align(
+              alignment: value
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: value ? 9 : 0,
+                  right: value ? 0 : 9,
+                ),
+                child: Text(
+                  value ? 'ON' : 'OFF',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
