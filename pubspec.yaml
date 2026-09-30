@@ -25,4 +25,4 @@ flutter:
   uses-material-design: true
 
 dependency_overrides:
-  google_sign_in_android: 7.2.7
+  google_sign_in_android: 7.2.17
