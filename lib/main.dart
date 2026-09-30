@@ -2627,6 +2627,11 @@ class GamePage extends StatelessWidget {
     ),
   ],
 ),
+        ],
+      ),
+    );
+  }
+}
 
 class PlayerVisualCard extends StatelessWidget {
   final String title;
