@@ -2608,21 +2608,21 @@ class GamePage extends StatelessWidget {
     Expanded(
       child: GameVisualItem(
         title: 'Tash Card',
-        visual: CardVisual(),
+        visual: TashCardsVisual(),
       ),
     ),
     SizedBox(width: 10),
     Expanded(
       child: GameVisualItem(
         title: 'Board',
-        visual: BoardVisual(),
+        visual: TashBoardVisual(),
       ),
     ),
     SizedBox(width: 10),
     Expanded(
       child: GameVisualItem(
         title: 'Box',
-        visual: BoxVisual(),
+        visual: TashCardBoxVisual(),
       ),
     ),
   ],
