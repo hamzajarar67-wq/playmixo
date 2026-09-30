@@ -227,7 +227,7 @@ jobs:
       - name: Check Release APK SHA-1
         run: |
              echo "===== FINAL RELEASE APK CERTIFICATE ====="
-             keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk
+             apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
              echo "=========================================="
 
       - name: Upload APK
