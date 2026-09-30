@@ -1892,7 +1892,7 @@ class _RealCard extends StatelessWidget {
         ),
         boxShadow: const [
           BoxShadow(
-            color: Colors.black35,
+            Colors.black.withValues(alpha: 0.35)
             blurRadius: 5,
             offset: Offset(2, 3),
           ),
