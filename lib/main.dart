@@ -3598,6 +3598,12 @@ content: Text(
 ),
 
 
+        ],
+      ),
+    );
+  }
+}
+
 /* ================= SETTING ITEM ================= */
 
 class SettingItem extends StatelessWidget {
