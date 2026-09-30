@@ -223,6 +223,12 @@ jobs:
 
       - name: Build APK
         run: flutter build apk --release
+        
+      - name: Check Release APK SHA-1
+        run: |
+          echo "===== FINAL RELEASE APK SHA-1 ====="
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep -E "SHA1:|SHA-1:"
+          echo "=================================="
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
