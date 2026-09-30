@@ -508,8 +508,8 @@ Future<void> demoSocialLogin(String provider) async {
   try {
     final googleSignIn = GoogleSignIn.instance;
 
-    await googleSignIn.signOut();
-
+    // Do NOT sign out before authentication.
+    // This can trigger Account reauth failed [16].
     final googleUser = await googleSignIn.authenticate();
 
     final googleAuth = googleUser.authentication;
@@ -568,22 +568,19 @@ Future<void> demoSocialLogin(String provider) async {
       e.message ?? 'Google sign-in failed',
     );
   } on GoogleSignInException catch (e) {
-  if (!mounted) return;
+    if (!mounted) return;
 
-  setState(() {
-    isLoading = false;
-  });
+    setState(() {
+      isLoading = false;
+    });
 
-  debugPrint('================ GOOGLE ERROR ================');
-  debugPrint('Code: ${e.code}');
-  debugPrint('Description: ${e.description}');
-  debugPrint('Details: $e');
-  debugPrint('==============================================');
+    debugPrint('GOOGLE ERROR CODE: ${e.code}');
+    debugPrint('GOOGLE ERROR DESCRIPTION: ${e.description}');
 
-  showMessage(
-    'Google Error: ${e.code}\n${e.description ?? 'Unknown error'}',
-  );
-} catch (e) {
+    showMessage(
+      'Google Error: ${e.code}\n${e.description ?? 'Unknown error'}',
+    );
+  } catch (e) {
     if (!mounted) return;
 
     setState(() {
