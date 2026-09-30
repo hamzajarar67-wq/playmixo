@@ -221,6 +221,10 @@ jobs:
       - name: Clean Flutter Build
         run: flutter clean
 
+      - name: Check Android Application ID
+        run: |
+          grep -R "applicationId" android/app/build.gradle.kts android/app/build.gradle 2>/dev/null || true
+
       - name: Build APK
         run: flutter build apk --release
         
