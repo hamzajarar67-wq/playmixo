@@ -29,7 +29,7 @@ jobs:
       - name: Copy Firebase config
         run: |
           mkdir -p android/app
-          cp "google-services (10).json" android/app/google-services.json
+          cp "google-services (11).json" android/app/google-services.json
       - name: Install Android NDK
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
