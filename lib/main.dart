@@ -3,6 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+
+final ValueNotifier<String> playmixoLanguageCode =
+    ValueNotifier<String>('en');
+
 /* ================= SPLASH ================= */
 
 class PlaymixoSplash extends StatefulWidget {
@@ -16,6 +21,529 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
   @override
 void initState() {
   super.initState();
+  _loadSavedLanguage();
+
+Future<void> _loadSavedLanguage() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return;
+
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final data = snapshot.data();
+    final language = data?['language'];
+
+    if (language is String && language.isNotEmpty) {
+      playmixoLanguageCode.value = language;
+    }
+  } catch (_) {
+    // Keep English if language cannot be loaded.
+  }
+}
+
+
+  class PlaymixoTranslations {
+  static const Map<String, Map<String, String>> _translations = {
+    'en': {
+      'welcome': 'Welcome to PLAYMIXO',
+      'home': 'Home',
+      'room': 'Room',
+      'game': 'Game',
+      'wallet': 'Wallet',
+      'profile': 'Profile',
+      'setting': 'Setting',
+      'privacy': 'Privacy',
+      'account': 'Account',
+      'language': 'Language',
+      'help_center': 'Help Center',
+      'logout': 'Log Out',
+      'delete_account': 'Delete Account',
+      'change_email': 'Change Email',
+'change_password': 'Change Password',
+'account_information': 'Account Information',
+'linked_accounts': 'Linked Accounts',
+      'name': 'Name',
+'email': 'Email',
+'mobile_number': 'Mobile Number',
+'uid': 'UID',
+      'new_email': 'New Email',
+'change_email': 'Change Email',
+'verification_email_sent': 'Verification email sent. Please verify your new email.',
+      'new_password': 'New Password',
+'confirm_password': 'Confirm Password',
+'password_changed': 'Password changed successfully',
+'passwords_not_match': 'Passwords do not match',
+      'faq': 'Frequently Asked Questions',
+'contact_support': 'Contact Support',
+'report_problem': 'Report a Problem',
+'logout_confirm': 'Are you sure you want to log out?',
+'yes': 'Yes',
+'no': 'No',
+'delete_confirm': 'Are you sure you want to permanently delete your account?',
+'permanent_action': 'This action is permanent.',
+'delete_password_message': 'Enter your password to permanently delete your account.',
+'password': 'Password',
+'delete_permanently': 'Delete Account Permanently',
+'please_enter_password': 'Please enter your password',
+'incorrect_password': 'Incorrect password',
+'login_again': 'Please log in again and try again',
+'something_wrong': 'Something went wrong',
+     'google_account': 'Google Account', 
+      'facebook_account': 'Facebook Account',
+    },
+
+    'ur': {
+      'welcome': 'PLAYMIXO میں خوش آمدید',
+      'home': 'ہوم',
+      'room': 'روم',
+      'game': 'گیم',
+      'wallet': 'والٹ',
+      'profile': 'پروفائل',
+      'setting': 'سیٹنگ',
+      'privacy': 'پرائیویسی',
+      'account': 'اکاؤنٹ',
+      'language': 'زبان',
+      'help_center': 'مدد مرکز',
+      'logout': 'لاگ آؤٹ',
+      'delete_account': 'اکاؤنٹ حذف کریں',
+      'change_email': 'ای میل تبدیل کریں',
+'change_password': 'پاس ورڈ تبدیل کریں',
+'account_information': 'اکاؤنٹ کی معلومات',
+'linked_accounts': 'منسلک اکاؤنٹس',
+      'name': 'نام',
+'email': 'ای میل',
+'mobile_number': 'موبائل نمبر',
+'uid': 'یو آئی ڈی',
+      'new_email': 'نیا ای میل',
+'change_email': 'ای میل تبدیل کریں',
+'verification_email_sent': 'تصدیقی ای میل بھیج دی گئی ہے۔ براہ کرم اپنے نئے ای میل کی تصدیق کریں۔',
+      'new_password': 'نیا پاس ورڈ',
+'confirm_password': 'پاس ورڈ کی تصدیق کریں',
+'password_changed': 'پاس ورڈ کامیابی سے تبدیل ہو گیا',
+'passwords_not_match': 'پاس ورڈز مماثل نہیں ہیں',
+      'faq': 'اکثر پوچھے گئے سوالات',
+'contact_support': 'سپورٹ سے رابطہ کریں',
+'report_problem': 'مسئلہ رپورٹ کریں',
+'logout_confirm': 'کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟',
+'yes': 'ہاں',
+'no': 'نہیں',
+'delete_confirm': 'کیا آپ واقعی اپنا اکاؤنٹ مستقل طور پر حذف کرنا چاہتے ہیں؟',
+'permanent_action': 'یہ کارروائی مستقل ہے۔',
+'delete_password_message': 'اپنا اکاؤنٹ مستقل طور پر حذف کرنے کے لیے پاس ورڈ درج کریں۔',
+'password': 'پاس ورڈ',
+'delete_permanently': 'اکاؤنٹ مستقل طور پر حذف کریں',
+'please_enter_password': 'براہ کرم اپنا پاس ورڈ درج کریں',
+'incorrect_password': 'غلط پاس ورڈ',
+'login_again': 'براہ کرم دوبارہ لاگ اِن کریں اور دوبارہ کوشش کریں',
+'something_wrong': 'کچھ غلط ہو گیا',
+      'google_account': 'گوگل اکاؤنٹ',
+     'facebook_account': 'فیس بک اکاؤنٹ', 
+    },
+
+    'hi': {
+      'welcome': 'PLAYMIXO में आपका स्वागत है',
+      'home': 'होम',
+      'room': 'रूम',
+      'game': 'गेम',
+      'wallet': 'वॉलेट',
+      'profile': 'प्रोफ़ाइल',
+      'setting': 'सेटिंग',
+      'privacy': 'प्राइवेसी',
+      'account': 'अकाउंट',
+      'language': 'भाषा',
+      'help_center': 'सहायता केंद्र',
+      'logout': 'लॉग आउट',
+      'delete_account': 'अकाउंट हटाएं',
+      'change_email': 'ईमेल बदलें',
+'change_password': 'पासवर्ड बदलें',
+'account_information': 'अकाउंट की जानकारी',
+'linked_accounts': 'लिंक किए गए अकाउंट',
+      'name': 'नाम',
+'email': 'ईमेल',
+'mobile_number': 'मोबाइल नंबर',
+'uid': 'यूआईडी',
+      'new_email': 'नया ईमेल',
+'change_email': 'ईमेल बदलें',
+'verification_email_sent': 'सत्यापन ईमेल भेज दिया गया है। कृपया अपने नए ईमेल की पुष्टि करें।',
+      'new_password': 'नया पासवर्ड',
+'confirm_password': 'पासवर्ड की पुष्टि करें',
+'password_changed': 'पासवर्ड सफलतापूर्वक बदल दिया गया',
+'passwords_not_match': 'पासवर्ड मेल नहीं खाते',
+      'faq': 'अक्सर पूछे जाने वाले प्रश्न',
+'contact_support': 'सपोर्ट से संपर्क करें',
+'report_problem': 'समस्या की रिपोर्ट करें',
+'logout_confirm': 'क्या आप वाकई लॉग आउट करना चाहते हैं?',
+'yes': 'हाँ',
+'no': 'नहीं',
+'delete_confirm': 'क्या आप वाकई अपना अकाउंट स्थायी रूप से हटाना चाहते हैं?',
+'permanent_action': 'यह कार्रवाई स्थायी है।',
+'delete_password_message': 'अपना अकाउंट स्थायी रूप से हटाने के लिए पासवर्ड दर्ज करें।',
+'password': 'पासवर्ड',
+'delete_permanently': 'अकाउंट स्थायी रूप से हटाएं',
+'please_enter_password': 'कृपया अपना पासवर्ड दर्ज करें',
+'incorrect_password': 'गलत पासवर्ड',
+'login_again': 'कृपया दोबारा लॉग इन करें और फिर कोशिश करें',
+'something_wrong': 'कुछ गलत हो गया',
+    'google_account': 'Google अकाउंट',  
+      'facebook_account': 'Facebook अकाउंट',
+    },
+
+    'ar': {
+      'welcome': 'مرحباً بك في PLAYMIXO',
+      'home': 'الرئيسية',
+      'room': 'الغرفة',
+      'game': 'اللعبة',
+      'wallet': 'المحفظة',
+      'profile': 'الملف الشخصي',
+      'setting': 'الإعدادات',
+      'privacy': 'الخصوصية',
+      'account': 'الحساب',
+      'language': 'اللغة',
+      'help_center': 'مركز المساعدة',
+      'logout': 'تسجيل الخروج',
+      'delete_account': 'حذف الحساب',
+      'change_email': 'تغيير البريد الإلكتروني',
+'change_password': 'تغيير كلمة المرور',
+'account_information': 'معلومات الحساب',
+'linked_accounts': 'الحسابات المرتبطة',
+      'name': 'الاسم',
+'email': 'البريد الإلكتروني',
+'mobile_number': 'رقم الهاتف',
+'uid': 'معرّف المستخدم',
+      'new_email': 'البريد الإلكتروني الجديد',
+'change_email': 'تغيير البريد الإلكتروني',
+'verification_email_sent': 'تم إرسال رسالة التحقق. يرجى تأكيد بريدك الإلكتروني الجديد.',
+      'new_password': 'كلمة المرور الجديدة',
+'confirm_password': 'تأكيد كلمة المرور',
+'password_changed': 'تم تغيير كلمة المرور بنجاح',
+'passwords_not_match': 'كلمتا المرور غير متطابقتين',
+      'faq': 'الأسئلة الشائعة',
+'contact_support': 'تواصل مع الدعم',
+'report_problem': 'الإبلاغ عن مشكلة',
+'logout_confirm': 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+'yes': 'نعم',
+'no': 'لا',
+'delete_confirm': 'هل أنت متأكد أنك تريد حذف حسابك نهائيًا؟',
+'permanent_action': 'هذا الإجراء نهائي.',
+'delete_password_message': 'أدخل كلمة المرور لحذف حسابك نهائيًا.',
+'password': 'كلمة المرور',
+'delete_permanently': 'حذف الحساب نهائيًا',
+'please_enter_password': 'يرجى إدخال كلمة المرور',
+'incorrect_password': 'كلمة المرور غير صحيحة',
+'login_again': 'يرجى تسجيل الدخول مرة أخرى والمحاولة مجددًا',
+'something_wrong': 'حدث خطأ ما',
+      'google_account': 'حساب Google',
+      'facebook_account': 'حساب Facebook',
+      
+    },
+
+    'bn': {
+      'welcome': 'PLAYMIXO-তে স্বাগতম',
+      'home': 'হোম',
+      'room': 'রুম',
+      'game': 'গেম',
+      'wallet': 'ওয়ালেট',
+      'profile': 'প্রোফাইল',
+      'setting': 'সেটিং',
+      'privacy': 'গোপনীয়তা',
+      'account': 'অ্যাকাউন্ট',
+      'language': 'ভাষা',
+      'help_center': 'সহায়তা কেন্দ্র',
+      'logout': 'লগ আউট',
+      'delete_account': 'অ্যাকাউন্ট মুছুন',
+      'change_email': 'ইমেইল পরিবর্তন করুন',
+'change_password': 'পাসওয়ার্ড পরিবর্তন করুন',
+'account_information': 'অ্যাকাউন্টের তথ্য',
+'linked_accounts': 'সংযুক্ত অ্যাকাউন্ট',
+      'name': 'নাম',
+'email': 'ইমেইল',
+'mobile_number': 'মোবাইল নম্বর',
+'uid': 'ইউআইডি',
+      'new_email': 'নতুন ইমেইল',
+'change_email': 'ইমেইল পরিবর্তন করুন',
+'verification_email_sent': 'যাচাইকরণ ইমেইল পাঠানো হয়েছে। আপনার নতুন ইমেইল যাচাই করুন।',
+      'new_password': 'নতুন পাসওয়ার্ড',
+'confirm_password': 'পাসওয়ার্ড নিশ্চিত করুন',
+'password_changed': 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে',
+'passwords_not_match': 'পাসওয়ার্ড মিলছে না',
+      'faq': 'প্রায়শই জিজ্ঞাসিত প্রশ্ন',
+'contact_support': 'সাপোর্টে যোগাযোগ করুন',
+'report_problem': 'সমস্যা রিপোর্ট করুন',
+'logout_confirm': 'আপনি কি সত্যিই লগ আউট করতে চান?',
+'yes': 'হ্যাঁ',
+'no': 'না',
+'delete_confirm': 'আপনি কি সত্যিই আপনার অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলতে চান?',
+'permanent_action': 'এই কাজটি স্থায়ী।',
+'delete_password_message': 'আপনার অ্যাকাউন্ট স্থায়ীভাবে মুছতে পাসওয়ার্ড লিখুন।',
+'password': 'পাসওয়ার্ড',
+'delete_permanently': 'অ্যাকাউন্ট স্থায়ীভাবে মুছুন',
+'please_enter_password': 'অনুগ্রহ করে আপনার পাসওয়ার্ড লিখুন',
+'incorrect_password': 'ভুল পাসওয়ার্ড',
+'login_again': 'অনুগ্রহ করে আবার লগ ইন করে চেষ্টা করুন',
+'something_wrong': 'কিছু ভুল হয়েছে',
+      'google_account': 'Google অ্যাকাউন্ট',
+      'facebook_account': 'Facebook অ্যাকাউন্ট',
+    },
+
+    'tr': {
+      'welcome': 'PLAYMIXO’ya Hoş Geldiniz',
+      'home': 'Ana Sayfa',
+      'room': 'Oda',
+      'game': 'Oyun',
+      'wallet': 'Cüzdan',
+      'profile': 'Profil',
+      'setting': 'Ayarlar',
+      'privacy': 'Gizlilik',
+      'account': 'Hesap',
+      'language': 'Dil',
+      'help_center': 'Yardım Merkezi',
+      'logout': 'Çıkış Yap',
+      'delete_account': 'Hesabı Sil',
+      'change_email': 'E-postayı Değiştir',
+'change_password': 'Şifreyi Değiştir',
+'account_information': 'Hesap Bilgileri',
+'linked_accounts': 'Bağlı Hesaplar',
+      'name': 'Ad',
+'email': 'E-posta',
+'mobile_number': 'Cep Numarası',
+'uid': 'UID',
+      'new_email': 'Yeni E-posta',
+'change_email': 'E-postayı Değiştir',
+'verification_email_sent': 'Doğrulama e-postası gönderildi. Lütfen yeni e-postanızı doğrulayın.',
+      'new_password': 'Yeni Şifre',
+'confirm_password': 'Şifreyi Onayla',
+'password_changed': 'Şifre başarıyla değiştirildi',
+'passwords_not_match': 'Şifreler eşleşmiyor',
+      'faq': 'Sık Sorulan Sorular',
+'contact_support': 'Destek ile İletişime Geç',
+'report_problem': 'Sorun Bildir',
+'logout_confirm': 'Çıkış yapmak istediğinizden emin misiniz?',
+'yes': 'Evet',
+'no': 'Hayır',
+'delete_confirm': 'Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?',
+'permanent_action': 'Bu işlem kalıcıdır.',
+'delete_password_message': 'Hesabınızı kalıcı olarak silmek için şifrenizi girin.',
+'password': 'Şifre',
+'delete_permanently': 'Hesabı Kalıcı Olarak Sil',
+'please_enter_password': 'Lütfen şifrenizi girin',
+'incorrect_password': 'Yanlış şifre',
+'login_again': 'Lütfen tekrar giriş yapın ve yeniden deneyin',
+'something_wrong': 'Bir şeyler yanlış gitti',
+      'google_account': 'Google Hesabı',
+      'facebook_account': 'Facebook Hesabı',
+    },
+
+    'es': {
+      'welcome': 'Bienvenido a PLAYMIXO',
+      'home': 'Inicio',
+      'room': 'Sala',
+      'game': 'Juego',
+      'wallet': 'Billetera',
+      'profile': 'Perfil',
+      'setting': 'Configuración',
+      'privacy': 'Privacidad',
+      'account': 'Cuenta',
+      'language': 'Idioma',
+      'help_center': 'Centro de ayuda',
+      'logout': 'Cerrar sesión',
+      'delete_account': 'Eliminar cuenta',
+      'change_email': 'Cambiar correo electrónico',
+'change_password': 'Cambiar contraseña',
+'account_information': 'Información de la cuenta',
+'linked_accounts': 'Cuentas vinculadas',
+      'name': 'Nombre',
+'email': 'Correo electrónico',
+'mobile_number': 'Número de móvil',
+'uid': 'UID',
+      'new_email': 'Nuevo correo electrónico',
+'change_email': 'Cambiar correo electrónico',
+'verification_email_sent': 'Se ha enviado un correo de verificación. Confirma tu nuevo correo electrónico.',
+      'new_password': 'Nueva contraseña',
+'confirm_password': 'Confirmar contraseña',
+'password_changed': 'Contraseña cambiada correctamente',
+'passwords_not_match': 'Las contraseñas no coinciden',
+      'faq': 'Preguntas frecuentes',
+'contact_support': 'Contactar con soporte',
+'report_problem': 'Informar de un problema',
+'logout_confirm': '¿Seguro que quieres cerrar sesión?',
+'yes': 'Sí',
+'no': 'No',
+'delete_confirm': '¿Seguro que quieres eliminar tu cuenta permanentemente?',
+'permanent_action': 'Esta acción es permanente.',
+'delete_password_message': 'Introduce tu contraseña para eliminar permanentemente tu cuenta.',
+'password': 'Contraseña',
+'delete_permanently': 'Eliminar cuenta permanentemente',
+'please_enter_password': 'Introduce tu contraseña',
+'incorrect_password': 'Contraseña incorrecta',
+'login_again': 'Inicia sesión de nuevo e inténtalo otra vez',
+'something_wrong': 'Algo salió mal',
+     'google_account': 'Cuenta de Google', 
+      'facebook_account': 'Cuenta de Facebook',
+    },
+  
+
+    'fr': {
+      'welcome': 'Bienvenue sur PLAYMIXO',
+      'home': 'Accueil',
+      'room': 'Salon',
+      'game': 'Jeu',
+      'wallet': 'Portefeuille',
+      'profile': 'Profil',
+      'setting': 'Paramètres',
+      'privacy': 'Confidentialité',
+      'account': 'Compte',
+      'language': 'Langue',
+      'help_center': 'Centre d’aide',
+      'logout': 'Se déconnecter',
+      'delete_account': 'Supprimer le compte',
+      'change_email': 'Modifier l’e-mail',
+'change_password': 'Modifier le mot de passe',
+'account_information': 'Informations du compte',
+'linked_accounts': 'Comptes liés',
+      'name': 'Nom',
+'email': 'E-mail',
+'mobile_number': 'Numéro de mobile',
+'uid': 'UID',
+      'new_email': 'Nouvel e-mail',
+'change_email': 'Modifier l’e-mail',
+'verification_email_sent': 'L’e-mail de vérification a été envoyé. Veuillez confirmer votre nouvel e-mail.',
+      'new_password': 'Nouveau mot de passe',
+'confirm_password': 'Confirmer le mot de passe',
+'password_changed': 'Mot de passe modifié avec succès',
+'passwords_not_match': 'Les mots de passe ne correspondent pas',
+      'faq': 'Questions fréquentes',
+'contact_support': 'Contacter le support',
+'report_problem': 'Signaler un problème',
+'logout_confirm': 'Voulez-vous vraiment vous déconnecter ?',
+'yes': 'Oui',
+'no': 'Non',
+'delete_confirm': 'Voulez-vous vraiment supprimer définitivement votre compte ?',
+'permanent_action': 'Cette action est définitive.',
+'delete_password_message': 'Entrez votre mot de passe pour supprimer définitivement votre compte.',
+'password': 'Mot de passe',
+'delete_permanently': 'Supprimer définitivement le compte',
+'please_enter_password': 'Veuillez saisir votre mot de passe',
+'incorrect_password': 'Mot de passe incorrect',
+'login_again': 'Veuillez vous reconnecter et réessayer',
+'something_wrong': 'Une erreur est survenue',
+      'google_account': 'Compte Google',
+      'facebook_account': 'Compte Facebook',
+    },
+
+    'id': {
+      'welcome': 'Selamat Datang di PLAYMIXO',
+      'home': 'Beranda',
+      'room': 'Ruangan',
+      'game': 'Permainan',
+      'wallet': 'Dompet',
+      'profile': 'Profil',
+      'setting': 'Pengaturan',
+      'privacy': 'Privasi',
+      'account': 'Akun',
+      'language': 'Bahasa',
+      'help_center': 'Pusat Bantuan',
+      'logout': 'Keluar',
+      'delete_account': 'Hapus Akun',
+      'change_email': 'Ubah Email',
+'change_password': 'Ubah Kata Sandi',
+'account_information': 'Informasi Akun',
+'linked_accounts': 'Akun Terhubung',
+      'name': 'Nama',
+'email': 'Email',
+'mobile_number': 'Nomor Ponsel',
+'uid': 'UID',
+      'new_email': 'Email Baru',
+'change_email': 'Ubah Email',
+'verification_email_sent': 'Email verifikasi telah dikirim. Silakan verifikasi email baru Anda.',
+      'new_password': 'Kata Sandi Baru',
+'confirm_password': 'Konfirmasi Kata Sandi',
+'password_changed': 'Kata sandi berhasil diubah',
+'passwords_not_match': 'Kata sandi tidak cocok',
+      'faq': 'Pertanyaan yang Sering Diajukan',
+'contact_support': 'Hubungi Dukungan',
+'report_problem': 'Laporkan Masalah',
+'logout_confirm': 'Apakah Anda yakin ingin keluar?',
+'yes': 'Ya',
+'no': 'Tidak',
+'delete_confirm': 'Apakah Anda yakin ingin menghapus akun secara permanen?',
+'permanent_action': 'Tindakan ini permanen.',
+'delete_password_message': 'Masukkan kata sandi untuk menghapus akun secara permanen.',
+'password': 'Kata Sandi',
+'delete_permanently': 'Hapus Akun Secara Permanen',
+'please_enter_password': 'Silakan masukkan kata sandi Anda',
+'incorrect_password': 'Kata sandi salah',
+'login_again': 'Silakan masuk lagi dan coba kembali',
+'something_wrong': 'Terjadi kesalahan',
+      'google_account': 'Akun Google',
+      'facebook_account': 'Akun Facebook',
+    },
+
+    'pt': {
+      'welcome': 'Bem-vindo ao PLAYMIXO',
+      'home': 'Início',
+      'room': 'Sala',
+      'game': 'Jogo',
+      'wallet': 'Carteira',
+      'profile': 'Perfil',
+      'setting': 'Configurações',
+      'privacy': 'Privacidade',
+      'account': 'Conta',
+      'language': 'Idioma',
+      'help_center': 'Central de Ajuda',
+      'logout': 'Sair',
+      'delete_account': 'Excluir conta',
+      'change_email': 'Alterar e-mail',
+'change_password': 'Alterar senha',
+'account_information': 'Informações da conta',
+'linked_accounts': 'Contas vinculadas',
+      'name': 'Nome',
+'email': 'E-mail',
+'mobile_number': 'Número de celular',
+'uid': 'UID',
+      'new_email': 'Novo e-mail',
+'change_email': 'Alterar e-mail',
+'verification_email_sent': 'O e-mail de verificação foi enviado. Confirme seu novo e-mail.',
+      'new_password': 'Nova senha',
+'confirm_password': 'Confirmar senha',
+'password_changed': 'Senha alterada com sucesso',
+'passwords_not_match': 'As senhas não coincidem',
+      'faq': 'Perguntas frequentes',
+'contact_support': 'Contactar o suporte',
+'report_problem': 'Comunicar um problema',
+'logout_confirm': 'Tem certeza de que deseja sair?',
+'yes': 'Sim',
+'no': 'Não',
+'delete_confirm': 'Tem certeza de que deseja excluir sua conta permanentemente?',
+'permanent_action': 'Esta ação é permanente.',
+'delete_password_message': 'Digite sua senha para excluir sua conta permanentemente.',
+'password': 'Senha',
+'delete_permanently': 'Excluir conta permanentemente',
+'please_enter_password': 'Digite sua senha',
+'incorrect_password': 'Senha incorreta',
+'login_again': 'Faça login novamente e tente outra vez',
+'something_wrong': 'Algo deu errado',
+      'google_account': 'Conta do Google',
+      'facebook_account': 'Conta do Facebook',
+    },
+  };
+
+  static String text(String languageCode, String key) {
+    return _translations[languageCode]?[key] ??
+        _translations['en']?[key] ??
+        key;
+  }
+}
+  String tr(String key) {
+  return PlaymixoTranslations.text(
+    playmixoLanguageCode.value,
+    key,
+  );
+  }
+  
 
   Future.delayed(const Duration(seconds: 2), () {
     if (!mounted) return;
@@ -113,19 +641,24 @@ class PlaymixoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Playmixo',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: bg,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: gold,
-          brightness: Brightness.light,
-        ),
-      ),
-      home: const PlaymixoSplash(),
+    return ValueListenableBuilder<String>(
+      valueListenable: playmixoLanguageCode,
+      builder: (context, languageCode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Playmixo',
+          theme: ThemeData(
+            useMaterial3: true,
+            scaffoldBackgroundColor: bg,
+            fontFamily: 'Roboto',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: gold,
+              brightness: Brightness.light,
+            ),
+          ),
+          home: const PlaymixoSplash(),
+        );
+      },
     );
   }
 }
@@ -2935,53 +3468,145 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Setting',
+  title: tr('setting'),
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
           SettingItem(
-            Icons.lock_outline,
-            'Privacy',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const PrivacyPage(),
-                ),
-              );
-            },
-          ),
-
-          const SettingItem(
-            Icons.person_outline,
-            'Account',
-          ),
-
-          const SettingItem(
-            Icons.language,
-            'Language',
-          ),
-
-          const SettingItem(
-            Icons.help_outline,
-            'Help Center',
-          ),
-
-          const SettingItem(
-            Icons.logout,
-            'Log Out',
-          ),
-
-          const SettingItem(
-            Icons.delete_outline,
-            'Delete Account',
-            danger: true,
-          ),
-        ],
+  Icons.lock_outline,
+  tr('privacy'),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PrivacyPage(),
       ),
     );
-  }
-}
+  },
+),
+
+SettingItem(
+  Icons.person_outline,
+  tr('account'),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AccountPage(),
+      ),
+    );
+  },
+),
+
+SettingItem(
+  Icons.language,
+  tr('language'),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LanguagePage(),
+      ),
+    );
+  },
+),
+
+          SettingItem(
+  Icons.help_outline,
+  'Help Center',
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const HelpCenterPage(),
+      ),
+    );
+  },
+),
+
+          SettingItem(
+  Icons.logout,
+  tr('logout'),
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(tr('logout')),
+          content: Text(
+  tr('logout_confirm'),
+),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: Text(tr('no')),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+
+                await FirebaseAuth.instance.signOut();
+
+                if (!context.mounted) return;
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AuthPage(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: Text(tr('yes')),
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
+
+          SettingItem(
+  Icons.delete_outline,
+  tr('delete_account'),
+  danger: true,
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(tr('delete_account')),
+content: Text(
+  tr('delete_confirm'),
+),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: Text(tr('no')),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DeleteAccountPage(),
+                  ),
+                );
+              },
+              child: Text(tr('yes')),
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
 
 
 /* ================= SETTING ITEM ================= */
@@ -3038,6 +3663,846 @@ class SettingItem extends StatelessWidget {
   }
 }
 
+
+
+
+
+
+class LanguagePage extends StatelessWidget {
+  const LanguagePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String>(
+      valueListenable: playmixoLanguageCode,
+      builder: (context, selectedLanguage, child) {
+        return AppPage(
+          title: 'Language',
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            children: [
+              _LanguageOption(
+                title: 'English',
+                code: 'en',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Urdu',
+                code: 'ur',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Hindi',
+                code: 'hi',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Arabic',
+                code: 'ar',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Bengali',
+                code: 'bn',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Turkish',
+                code: 'tr',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Spanish',
+                code: 'es',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'French',
+                code: 'fr',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Indonesian',
+                code: 'id',
+                selectedLanguage: selectedLanguage,
+              ),
+              _LanguageOption(
+                title: 'Portuguese',
+                code: 'pt',
+                selectedLanguage: selectedLanguage,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+class _LanguageOption extends StatelessWidget {
+  final String title;
+  final String code;
+  final String selectedLanguage;
+
+  const _LanguageOption({
+    required this.title,
+    required this.code,
+    required this.selectedLanguage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = selectedLanguage == code;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 11),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+      ),
+      child: ListTile(
+        onTap: () async {
+  playmixoLanguageCode.value = code;
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(
+      {
+        'language': code,
+      },
+      SetOptions(merge: true),
+    );
+  }
+},
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 17,
+          vertical: 3,
+        ),
+        leading: Icon(
+          Icons.language,
+          color: isSelected ? darkGold : Colors.black54,
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: black,
+          ),
+        ),
+        trailing: Icon(
+          isSelected
+              ? Icons.check_circle
+              : Icons.cancel,
+          color: isSelected ? darkGold : Colors.red,
+          size: 22,
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+class AccountPage extends StatelessWidget {
+  const AccountPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: tr('account'),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          SettingItem(
+            Icons.email_outlined,
+            tr('change_email'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ChangeEmailPage(),
+                ),
+              );
+            },
+          ),
+
+          SettingItem(
+            Icons.lock_outline,
+            tr('change_password'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ChangePasswordPage(),
+                ),
+              );
+            },
+          ),
+
+          SettingItem(
+            Icons.info_outline,
+            tr('account_information'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AccountInformationPage(),
+                ),
+              );
+            },
+          ),
+
+          SettingItem(
+            Icons.link,
+            tr('linked_accounts'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LinkedAccountsPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AccountInformationPage extends StatefulWidget {
+  const AccountInformationPage({super.key});
+
+  @override
+  State<AccountInformationPage> createState() =>
+      _AccountInformationPageState();
+}
+
+class _AccountInformationPageState
+    extends State<AccountInformationPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
+
+  bool isLoading = true;
+
+  String name = '';
+  String email = '';
+  String phone = '';
+  String uid = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAccountInformation();
+  }
+
+  Future<void> _loadAccountInformation() async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return;
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = snapshot.data();
+
+      if (!mounted) return;
+
+      setState(() {
+        name = data?['name']?.toString() ?? '';
+        email = user.email ?? '';
+        phone = user.phoneNumber ?? '';
+        uid = user.uid;
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        email = user.email ?? '';
+        phone = user.phoneNumber ?? '';
+        uid = user.uid;
+        isLoading = false;
+      });
+    }
+  }
+
+  Widget _infoBox(String title, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 15,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            value.isEmpty ? 'Not available' : value,
+            style: const TextStyle(
+              color: black,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+Widget build(BuildContext context) {
+  return AppPage(
+    title: tr('account_information'),
+    child: isLoading
+        ? const Center(
+              child: CircularProgressIndicator(
+                color: gold,
+              ),
+            )
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                4,
+                16,
+                24,
+              ),
+              children: [
+                _infoBox(tr('name'), name),
+               _infoBox(tr('email'), email),
+               _infoBox(tr('mobile_number'), phone),
+               _infoBox(tr('uid'), uid),
+              ],
+            ),
+    );
+  }
+}
+
+class ChangeEmailPage extends StatefulWidget {
+  const ChangeEmailPage({super.key});
+
+  @override
+  State<ChangeEmailPage> createState() => _ChangeEmailPageState();
+}
+
+class _ChangeEmailPageState extends State<ChangeEmailPage> {
+  final TextEditingController emailController =
+      TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> changeEmail() async {
+    final newEmail = emailController.text.trim();
+
+    if (newEmail.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a new email'),
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await user.verifyBeforeUpdateEmail(newEmail);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text(
+      tr('verification_email_sent'),
+    ),
+  ),
+);
+
+      emailController.clear();
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Failed to change email'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: tr('change_email'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        child: Column(
+          children: [
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+decoration: InputDecoration(
+  labelText: tr('new_email'),
+  border: const OutlineInputBorder(),
+),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : changeEmail,
+                child: isLoading
+    ? const CircularProgressIndicator()
+    : Text(tr('change_email')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
+  @override
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
+}
+
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
+  final TextEditingController passwordController =
+      TextEditingController();
+
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> changePassword() async {
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password must be at least 6 characters'),
+        ),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        tr('passwords_not_match'),
+      ),
+    ),
+  );
+  return;
+}
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await user.updatePassword(password);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text(
+      tr('password_changed'),
+    ),
+  ),
+);
+
+      passwordController.clear();
+      confirmPasswordController.clear();
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message ?? 'Failed to change password',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Change Password',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        child: Column(
+          children: [
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'New Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: confirmPasswordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Confirm Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : changePassword,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Change Password'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LinkedAccountsPage extends StatelessWidget {
+  const LinkedAccountsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    return AppPage(
+      title: tr('linked_accounts'),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          SettingItem(
+            Icons.email_outlined,
+            user?.email ?? tr('email'),
+          ),
+          SettingItem(
+            Icons.phone_outlined,
+            user?.phoneNumber ?? tr('mobile_number'),
+          ),
+          SettingItem(
+            Icons.g_mobiledata,
+            tr('google_account'),
+          ),
+          SettingItem(
+  Icons.facebook,
+  tr('facebook_account'),
+),
+        ],
+      ),
+    );
+  }
+}
+
+
+class HelpCenterPage extends StatelessWidget {
+  const HelpCenterPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+  title: tr('help_center'),
+  child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          SettingItem(
+            Icons.question_answer_outlined,
+           tr('faq'),
+          ),
+          SettingItem(
+            Icons.support_agent_outlined,
+            tr('contact_support'),
+          ),
+          SettingItem(
+            Icons.report_problem_outlined,
+            tr('report_problem'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class DeleteAccountPage extends StatefulWidget {
+  const DeleteAccountPage({super.key});
+
+  @override
+  State<DeleteAccountPage> createState() => _DeleteAccountPageState();
+}
+
+class _DeleteAccountPageState extends State<DeleteAccountPage> {
+  final TextEditingController passwordController =
+      TextEditingController();
+
+  bool isLoading = false;
+  bool obscurePassword = true;
+
+  Future<void> deleteAccount() async {
+    final password = passwordController.text.trim();
+
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text(
+      tr('please_enter_password'),
+    ),
+  ),
+);
+return;
+}
+
+final user = FirebaseAuth.instance.currentUser;
+
+if (user == null || user.email == null) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .delete();
+
+      await user.delete();
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AuthPage(),
+        ),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message = 'Failed to delete account';
+
+      if (e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
+        message = tr('incorrect_password');
+      } else if (e.code == 'requires-recent-login') {
+        message = tr('login_again');
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+  content: Text(
+    tr('something_wrong'),
+  ),
+),
+      
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: tr('delete_account'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+  tr('permanent_action'),
+  style: const TextStyle(
+    color: Colors.red,
+    fontSize: 16,
+    fontWeight: FontWeight.w900,
+  ),
+),
+  const SizedBox(height: 8),
+Text(
+  tr('delete_password_message'),
+  style: const TextStyle(
+    color: Colors.black54,
+    fontSize: 14,
+  ),
+),
+            const SizedBox(height: 20),
+            TextField(
+              controller: passwordController,
+              obscureText: obscurePassword,
+              decoration: InputDecoration(
+                labelText: tr('password'),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      obscurePassword = !obscurePassword;
+                    });
+                  },
+                  icon: Icon(
+                    obscurePassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : deleteAccount,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+  tr('delete_permanently'),
+  style: const TextStyle(
+    fontWeight: FontWeight.w800,
+  ),
+)
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+          
 
 /* ================= PRIVACY PAGE ================= */
 
