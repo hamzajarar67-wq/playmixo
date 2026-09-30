@@ -71,7 +71,6 @@ Future<void> _loadSavedLanguage() async {
 'mobile_number': 'Mobile Number',
 'uid': 'UID',
       'new_email': 'New Email',
-'change_email': 'Change Email',
 'verification_email_sent': 'Verification email sent. Please verify your new email.',
       'new_password': 'New Password',
 'confirm_password': 'Confirm Password',
