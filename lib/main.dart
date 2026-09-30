@@ -1499,115 +1499,74 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 12),
 
           /* NEW EVENT */
-          Container(
-            height: 94,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: black,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF2B2B2B)),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'New Event',
-                        style: TextStyle(
-                          color: gold,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Big Rewards Await You!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                      SizedBox(height: 7),
-                      SmallGoldButton(text: 'Join Now'),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.card_giftcard_rounded,
-                  color: gold,
-                  size: 58,
-                ),
-              ],
-            ),
+          const HomeWideBox(
+            title: 'New Event',
+            subtitle: 'Special rewards and events are waiting!',
+            visual: EventBoxVisual(),
+            buttonText: 'Join Now',
           ),
 
           const SizedBox(height: 12),
 
-          /* FIRST ROW */
-          Row(
-            children: const [
-              Expanded(
-                child: HomeVisualCard(
-                  title: 'New Board',
-                  visual: BoardVisual(),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: HomeVisualCard(
-                  title: 'New Card',
-                  visual: CardVisual(),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: HomeVisualCard(
-                  title: 'New Card Box',
-                  visual: BoxVisual(),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: HomeVisualCard(
-                  title: 'New Event',
-                  visual: GiftVisual(),
-                ),
-              ),
-            ],
+          /* NEW BOARD */
+          const HomeWideBox(
+            title: 'New Board',
+            subtitle: 'Playmixo Tash Board',
+            visual: TashBoardVisual(),
+            buttonText: 'Explore',
           ),
 
-          const SizedBox(height: 9),
+          const SizedBox(height: 12),
 
-          /* SECOND ROW */
-          Row(
-            children: const [
-              Expanded(
-                child: HomeIconCard(
-                  title: 'Free Reward',
-                  icon: Icons.card_giftcard_rounded,
-                ),
-              ),
-              SizedBox(width: 9),
-              Expanded(
-                child: HomeIconCard(
-                  title: 'Daily Task',
-                  icon: Icons.assignment_turned_in_rounded,
-                ),
-              ),
-              SizedBox(width: 9),
-              Expanded(
-                child: HomeIconCard(
-                  title: 'Update',
-                  icon: Icons.campaign_rounded,
-                ),
-              ),
-            ],
+          /* NEW CARD */
+          const HomeWideBox(
+            title: 'New Card',
+            subtitle: 'Realistic Tash Playing Cards',
+            visual: TashCardsVisual(),
+            buttonText: 'View Cards',
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
+
+          /* NEW CARD BOX */
+          const HomeWideBox(
+            title: 'New Card Box',
+            subtitle: 'Premium Tash Card Collection',
+            visual: TashCardBoxVisual(),
+            buttonText: 'Open Box',
+          ),
+
+          const SizedBox(height: 12),
+
+          /* FREE REWARD */
+          const HomeWideBox(
+            title: 'Free Reward',
+            subtitle: 'Open your free reward box',
+            visual: RewardBoxVisual(),
+            buttonText: 'Claim',
+          ),
+
+          const SizedBox(height: 12),
+
+          /* DAILY TASK */
+          const HomeWideBox(
+            title: 'Daily Task',
+            subtitle: 'Complete tasks and collect rewards',
+            visual: DailyTaskBoxVisual(),
+            buttonText: 'View Task',
+          ),
+
+          const SizedBox(height: 12),
+
+          /* UPDATE */
+          const HomeWideBox(
+            title: 'Update',
+            subtitle: 'Discover the latest Playmixo updates',
+            visual: UpdateBoxVisual(),
+            buttonText: 'View',
+          ),
+
+          const SizedBox(height: 16),
 
           Row(
             children: const [
@@ -1682,169 +1641,77 @@ class HomePage extends StatelessWidget {
   }
 }
 
-/* ================= HOME VISUAL CARDS ================= */
+/* ================= FULL WIDTH HOME BOX ================= */
 
-class HomeVisualCard extends StatelessWidget {
+class HomeWideBox extends StatelessWidget {
   final String title;
+  final String subtitle;
   final Widget visual;
+  final String buttonText;
 
-  const HomeVisualCard({
+  const HomeWideBox({
     super.key,
     required this.title,
+    required this.subtitle,
     required this.visual,
+    required this.buttonText,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 112,
-      padding: const EdgeInsets.all(7),
+      height: 124,
+      padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: Column(
-        children: [
-          Expanded(child: Center(child: visual)),
-          const SizedBox(height: 3),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HomeIconCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const HomeIconCard({
-    super.key,
-    required this.title,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 91,
-      padding: const EdgeInsets.all(7),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: gold, size: 30),
-          const SizedBox(height: 7),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ================= REAL-LOOKING CARD ================= */
-
-class CardVisual extends StatelessWidget {
-  const CardVisual({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 58,
-      height: 55,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 8,
-            top: 5,
-            child: Transform.rotate(
-              angle: -0.18,
-              child: _PlayingCard(
-                symbol: '♠',
-                number: 'A',
-              ),
-            ),
-          ),
-          Positioned(
-            left: 20,
-            top: 1,
-            child: Transform.rotate(
-              angle: 0.08,
-              child: _PlayingCard(
-                symbol: '♠',
-                number: 'A',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlayingCard extends StatelessWidget {
-  final String symbol;
-  final String number;
-
-  const _PlayingCard({
-    required this.symbol,
-    required this.number,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 35,
-      height: 49,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: Colors.black12),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFD8D0B8),
+          width: 1.2,
+        ),
         boxShadow: const [
           BoxShadow(
-            blurRadius: 3,
-            offset: Offset(1, 2),
-            color: Colors.black26,
+            color: Colors.black12,
+            blurRadius: 7,
+            offset: Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
         children: [
-          Text(
-            number,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                SmallGoldButton(text: buttonText),
+              ],
             ),
           ),
-          Text(
-            symbol,
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.black,
-            ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 115,
+            height: 100,
+            child: visual,
           ),
         ],
       ),
@@ -1852,43 +1719,93 @@ class _PlayingCard extends StatelessWidget {
   }
 }
 
-/* ================= REAL-LOOKING BOARD ================= */
+/* ================= REAL TASH BOARD ================= */
 
-class BoardVisual extends StatelessWidget {
-  const BoardVisual({super.key});
+class TashBoardVisual extends StatelessWidget {
+  const TashBoardVisual({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60,
-      height: 48,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: gold, width: 2),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4,
-            offset: Offset(1, 2),
-            color: Colors.black26,
+    return Center(
+      child: Container(
+        width: 108,
+        height: 82,
+        decoration: BoxDecoration(
+          color: const Color(0xFF17130D),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: const Color(0xFF9C7727),
+            width: 3,
           ),
-        ],
-      ),
-      child: Center(
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 8,
+              offset: Offset(2, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(7),
         child: Container(
-          width: 43,
-          height: 31,
           decoration: BoxDecoration(
-            color: const Color(0xFF302817),
-            borderRadius: BorderRadius.circular(7),
-            border: Border.all(color: gold),
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.star_rounded,
-              color: gold,
-              size: 20,
+            color: const Color(0xFF315B35),
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(
+              color: const Color(0xFFC5A34A),
+              width: 1.5,
             ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 8,
+                top: 7,
+                child: Container(
+                  width: 25,
+                  height: 17,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF234427),
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: gold),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 8,
+                top: 7,
+                child: Container(
+                  width: 25,
+                  height: 17,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF234427),
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: gold),
+                  ),
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: 34,
+                  height: 27,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E3922),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: gold),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'TASH',
+                      style: TextStyle(
+                        color: gold,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1896,47 +1813,245 @@ class BoardVisual extends StatelessWidget {
   }
 }
 
-/* ================= REAL-LOOKING BOX ================= */
+/* ================= REAL PLAYING CARDS ================= */
 
-class BoxVisual extends StatelessWidget {
-  const BoxVisual({super.key});
+class TashCardsVisual extends StatelessWidget {
+  const TashCardsVisual({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 59,
-      height: 54,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 9,
-            left: 5,
-            child: Container(
-              width: 50,
-              height: 39,
-              decoration: BoxDecoration(
-                color: const Color(0xFF181818),
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: gold, width: 1.5),
+    return Center(
+      child: SizedBox(
+        width: 105,
+        height: 86,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 17,
+              top: 8,
+              child: Transform.rotate(
+                angle: -0.18,
+                child: const _RealCard(
+                  number: 'A',
+                  symbol: '♠',
+                ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.workspace_premium_rounded,
-                  color: gold,
-                  size: 25,
+            ),
+            Positioned(
+              left: 38,
+              top: 3,
+              child: Transform.rotate(
+                angle: 0.02,
+                child: const _RealCard(
+                  number: 'K',
+                  symbol: '♥',
+                  red: true,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 59,
+              top: 9,
+              child: Transform.rotate(
+                angle: 0.16,
+                child: const _RealCard(
+                  number: 'Q',
+                  symbol: '♦',
+                  red: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RealCard extends StatelessWidget {
+  final String number;
+  final String symbol;
+  final bool red;
+
+  const _RealCard({
+    required this.number,
+    required this.symbol,
+    this.red = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 39,
+      height: 59,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFEFA),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(
+          color: const Color(0xFFBDB8AA),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black35,
+            blurRadius: 5,
+            offset: Offset(2, 3),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            number,
+            style: TextStyle(
+              color: red ? const Color(0xFF9D2525) : Colors.black,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                symbol,
+                style: TextStyle(
+                  color: red ? const Color(0xFF9D2525) : Colors.black,
+                  fontSize: 23,
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ================= REAL TASH CARD BOX ================= */
+
+class TashCardBoxVisual extends StatelessWidget {
+  const TashCardBoxVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 91,
+            height: 72,
+            decoration: BoxDecoration(
+              color: const Color(0xFF17130D),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFB18A32),
+                width: 2,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  blurRadius: 8,
+                  offset: Offset(2, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  'PLAYMIXO',
+                  style: TextStyle(
+                    color: gold,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'TASH',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'CARD COLLECTION',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 5,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Positioned(
-            top: 3,
-            left: 8,
+            top: 5,
             child: Container(
-              width: 44,
-              height: 11,
+              width: 68,
+              height: 5,
               decoration: BoxDecoration(
-                color: const Color(0xFF242424),
-                borderRadius: BorderRadius.circular(4),
+                color: const Color(0xFFC49B3A),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ================= REWARD BOX ================= */
+
+class RewardBoxVisual extends StatelessWidget {
+  const RewardBoxVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 82,
+            height: 63,
+            decoration: BoxDecoration(
+              color: const Color(0xFF18130D),
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: gold,
+                width: 2,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  blurRadius: 8,
+                  offset: Offset(2, 4),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.card_giftcard_rounded,
+                color: gold,
+                size: 38,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 1,
+            child: Container(
+              width: 74,
+              height: 15,
+              decoration: BoxDecoration(
+                color: const Color(0xFF242018),
+                borderRadius: BorderRadius.circular(5),
                 border: Border.all(color: gold),
               ),
             ),
@@ -1947,20 +2062,148 @@ class BoxVisual extends StatelessWidget {
   }
 }
 
-/* ================= GIFT ================= */
+/* ================= DAILY TASK BOX ================= */
 
-class GiftVisual extends StatelessWidget {
-  const GiftVisual({super.key});
+class DailyTaskBoxVisual extends StatelessWidget {
+  const DailyTaskBoxVisual({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Icon(
-      Icons.card_giftcard_rounded,
-      color: gold,
-      size: 42,
+    return Center(
+      child: Container(
+        width: 88,
+        height: 70,
+        decoration: BoxDecoration(
+          color: const Color(0xFF181818),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: gold,
+            width: 2,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 8,
+              offset: Offset(2, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.assignment_turned_in_rounded,
+              color: gold,
+              size: 32,
+            ),
+            SizedBox(height: 3),
+            Text(
+              'DAILY',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
+/* ================= UPDATE BOX ================= */
+
+class UpdateBoxVisual extends StatelessWidget {
+  const UpdateBoxVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 90,
+        height: 69,
+        decoration: BoxDecoration(
+          color: const Color(0xFF171717),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: gold,
+            width: 2,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 8,
+              offset: Offset(2, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.campaign_rounded,
+              color: gold,
+              size: 31,
+            ),
+            SizedBox(height: 3),
+            Text(
+              'UPDATE',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/* ================= EVENT BOX ================= */
+
+class EventBoxVisual extends StatelessWidget {
+  const EventBoxVisual({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 91,
+        height: 73,
+        decoration: BoxDecoration(
+          color: const Color(0xFF18130D),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: gold,
+            width: 2,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 8,
+              offset: Offset(2, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.card_giftcard_rounded,
+            color: gold,
+            size: 39,
+          ),
+        ),
+      ),
+    );
+  }
+}
+          
+
+              
 
 /* ================= ROOMS ================= */
 
