@@ -3343,13 +3343,23 @@ class WalletBalance extends StatelessWidget {
 }
 
 /* ================= PROFILE ================= */
-/* USER SAID DO NOT CHANGE */
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  void _open(BuildContext context, String title) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileFeaturePage(title: title),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return AppPage(
       title: 'Profile',
       child: ListView(
@@ -3364,37 +3374,42 @@ class ProfilePage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const CircleAvatar(
-                  radius: 47,
-                  backgroundColor: gold,
-                  child: Icon(
-                    Icons.person,
-                    size: 53,
-                    color: black,
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: gold, width: 3),
+                  ),
+                  child: CircleAvatar(
+                    radius: 43,
+                    backgroundColor: gold,
+                    backgroundImage: user?.photoURL != null
+                        ? NetworkImage(user!.photoURL!)
+                        : null,
+                    child: user?.photoURL == null
+                        ? const Icon(Icons.person, size: 50, color: black)
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Playmixo User',
-                  style: TextStyle(
+                Text(
+                  user?.displayName?.isNotEmpty == true
+                      ? user!.displayName!
+                      : 'Playmixo User',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 21,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'UID: 000000',
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                  ),
+                Text(
+                  'UID: ${user?.uid ?? 'Not signed in'}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white60, fontSize: 11),
                 ),
                 const SizedBox(height: 22),
-                Container(
-                  height: 1,
-                  color: Colors.white24,
-                ),
+                Container(height: 1, color: Colors.white24),
                 const SizedBox(height: 18),
                 const Row(
                   children: [
@@ -3406,6 +3421,56 @@ class ProfilePage extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 18),
+          const _ProfileSectionTitle('PROFILE CENTRE'),
+          _ProfileMenuTile(
+            icon: Icons.edit_outlined,
+            title: 'Edit Profile',
+            subtitle: 'Username, profile photo and bio',
+            onTap: () => _open(context, 'Edit Profile'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.auto_awesome,
+            title: 'Customization Centre',
+            subtitle: 'Frames, themes and ornaments',
+            onTap: () => _open(context, 'Customization Centre'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.people_outline,
+            title: 'Friends Centre',
+            subtitle: 'Requests, friends, messages and blocked users',
+            onTap: () => _open(context, 'Friends Centre'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.notifications_none,
+            title: 'Notifications',
+            subtitle: 'Choose which alerts you receive',
+            onTap: () => _open(context, 'Notifications'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.card_giftcard,
+            title: 'Gift Showcase',
+            subtitle: 'Your gifts and collection',
+            onTap: () => _open(context, 'Gift Showcase'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.workspace_premium_outlined,
+            title: 'Royal Badges & Achievements',
+            subtitle: 'Your earned badges and achievements',
+            onTap: () => _open(context, 'Royal Badges & Achievements'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.history,
+            title: 'Profile Activity',
+            subtitle: 'Visitors, followers and recent activity',
+            onTap: () => _open(context, 'Profile Activity'),
+          ),
+          _ProfileMenuTile(
+            icon: Icons.shield_outlined,
+            title: 'Privacy & Safety',
+            subtitle: 'Profile visibility and safety options',
+            onTap: () => _open(context, 'Privacy & Safety'),
           ),
         ],
       ),
@@ -3435,10 +3500,7 @@ class ProfileStat extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 10,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 10),
           ),
         ],
       ),
@@ -3446,7 +3508,620 @@ class ProfileStat extends StatelessWidget {
   }
 }
 
-/* ================= SETTINGS ================= */
+class _ProfileSectionTitle extends StatelessWidget {
+  final String title;
+  const _ProfileSectionTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 10, top: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: darkGold,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileMenuTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ProfileMenuTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 11),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        leading: Container(
+          width: 45,
+          height: 45,
+          decoration: BoxDecoration(
+            color: gold.withOpacity(0.18),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(icon, color: black),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: black,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(color: Colors.black54, fontSize: 11),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: darkGold),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class ProfileFeaturePage extends StatefulWidget {
+  final String title;
+  const ProfileFeaturePage({super.key, required this.title});
+
+  @override
+  State<ProfileFeaturePage> createState() => _ProfileFeaturePageState();
+}
+
+class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  String selectedFrame = 'Classic Gold';
+  String selectedTheme = 'Black Gold';
+  String selectedOrnament = 'None';
+
+  final usernameController = TextEditingController();
+  final bioController = TextEditingController();
+  bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      final data = doc.data() ?? {};
+      if (!mounted) return;
+      usernameController.text =
+          (data['displayName'] ?? user.displayName ?? '').toString();
+      bioController.text = (data['bio'] ?? '').toString();
+      selectedFrame = (data['profileFrame'] ?? 'Classic Gold').toString();
+      selectedTheme = (data['profileTheme'] ?? 'Black Gold').toString();
+      selectedOrnament = (data['profileOrnament'] ?? 'None').toString();
+      setState(() {});
+    } catch (_) {
+      // Profile can still be viewed if Firestore data is not available.
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      _message('Please sign in first.');
+      return;
+    }
+    if (usernameController.text.trim().isEmpty) {
+      _message('Please enter a username.');
+      return;
+    }
+
+    setState(() => loading = true);
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'displayName': usernameController.text.trim(),
+        'bio': bioController.text.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      await user.updateDisplayName(usernameController.text.trim());
+      if (!mounted) return;
+      _message('Profile saved.');
+    } catch (e) {
+      _message('Could not save profile. Check Firestore rules.');
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> _saveCustomization() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      _message('Please sign in first.');
+      return;
+    }
+    setState(() => loading = true);
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'profileFrame': selectedFrame,
+        'profileTheme': selectedTheme,
+        'profileOrnament': selectedOrnament,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      _message('Customization saved.');
+    } catch (_) {
+      _message('Could not save. Check Firestore rules.');
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  void _message(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _openChild(String title) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileFeaturePage(title: title),
+      ),
+    );
+  }
+
+  Widget _heading(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 12),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: darkGold,
+          fontSize: 15,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+
+  Widget _option({
+    required String title,
+    required String value,
+    required List<String> options,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: options.contains(value) ? value : options.first,
+        decoration: InputDecoration(
+          labelText: title,
+          border: InputBorder.none,
+        ),
+        items: options
+            .map((item) => DropdownMenuItem(
+                  value: item,
+                  child: Text(item),
+                ))
+            .toList(),
+        onChanged: (next) {
+          if (next != null) onChanged(next);
+        },
+      ),
+    );
+  }
+
+  Widget _action(String title, String subtitle, IconData icon,
+      {VoidCallback? onTap}) {
+    return _ProfileMenuTile(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap ?? () => _openChild(title),
+    );
+  }
+
+  Widget _editProfile() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('YOUR PROFILE INFORMATION'),
+        TextField(
+          controller: usernameController,
+          maxLength: 30,
+          decoration: const InputDecoration(
+            labelText: 'Username',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: bioController,
+          maxLength: 160,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: 'Bio',
+            hintText: 'Write something about yourself',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _action(
+          'Change Profile Photo',
+          'Photo upload will be connected in the next step',
+          Icons.photo_camera_outlined,
+          onTap: () => _message('Photo upload is not connected yet.'),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 52,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: black,
+              foregroundColor: gold,
+            ),
+            onPressed: loading ? null : _saveProfile,
+            child: loading
+                ? const CircularProgressIndicator(color: gold)
+                : const Text('SAVE PROFILE'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _customization() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('PROFILE PREVIEW'),
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: black,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: gold, width: 1.2),
+          ),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 42,
+                backgroundColor: gold,
+                child: const Icon(Icons.person, color: black, size: 46),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                usernameController.text.isEmpty
+                    ? 'Playmixo User'
+                    : usernameController.text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                '$selectedFrame • $selectedOrnament',
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Theme: $selectedTheme',
+                style: const TextStyle(color: gold, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        _heading('PROFILE FRAMES'),
+        _option(
+          title: 'Choose Frame',
+          value: selectedFrame,
+          options: const [
+            'Classic Gold',
+            'Royal',
+            'Diamond',
+            'Angel Wings',
+            'Dragon',
+            'VIP',
+            'Event',
+          ],
+          onChanged: (v) => setState(() => selectedFrame = v),
+        ),
+        _heading('PROFILE THEMES'),
+        _option(
+          title: 'Choose Theme',
+          value: selectedTheme,
+          options: const [
+            'Black Gold',
+            'Pink Royal',
+            'Purple Galaxy',
+            'Blue Ocean',
+            'Red Flame',
+            'Luxury Dark',
+          ],
+          onChanged: (v) => setState(() => selectedTheme = v),
+        ),
+        _heading('PROFILE ORNAMENTS'),
+        _option(
+          title: 'Choose Ornament',
+          value: selectedOrnament,
+          options: const [
+            'None',
+            'Crown',
+            'Wings',
+            'Dragon',
+            'Flowers',
+            'Stars',
+          ],
+          onChanged: (v) => setState(() => selectedOrnament = v),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 52,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: black,
+              foregroundColor: gold,
+            ),
+            onPressed: loading ? null : _saveCustomization,
+            child: loading
+                ? const CircularProgressIndicator(color: gold)
+                : const Text('APPLY & SAVE'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _friendsCentre() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('FRIENDS CENTRE'),
+        _action('Friend Requests', 'Accept or reject incoming requests',
+            Icons.person_add_alt_1),
+        _action('My Friends', 'View and search your friends', Icons.people),
+        _action('Friend Messages', 'Open conversations with friends',
+            Icons.chat_bubble_outline),
+        _action('Blocked Users', 'View and unblock users', Icons.block),
+      ],
+    );
+  }
+
+  Widget _notifications() {
+    const categories = [
+      'Friend Requests',
+      'Request Accepted',
+      'New Messages',
+      'Gift Received',
+      'Profile Activity',
+      'System Notifications',
+    ];
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('NOTIFICATION PREFERENCES'),
+        const Text(
+          'Notification preferences will be saved to your account when connected.',
+          style: TextStyle(color: Colors.black54),
+        ),
+        const SizedBox(height: 12),
+        ...categories.map(
+          (item) => SwitchListTile(
+            value: true,
+            activeColor: darkGold,
+            title: Text(item, style: const TextStyle(color: black)),
+            onChanged: (_) => _message(
+              'Notification saving is not connected yet.',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _giftShowcase() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('GIFT SHOWCASE'),
+        _action('Favourite Gifts', 'Your selected favourite gifts',
+            Icons.favorite_border),
+        _action('Gift Collection', 'Gifts collected on your profile',
+            Icons.card_giftcard),
+        _action('Most Received', 'Your most received gifts',
+            Icons.inventory_2_outlined),
+        _action('Gift History', 'Sent and received gift history',
+            Icons.history),
+      ],
+    );
+  }
+
+  Widget _badges() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('ROYAL BADGES & ACHIEVEMENTS'),
+        _action('VIP Level', 'Your current VIP level', Icons.workspace_premium),
+        _action('Gift Champion', 'Gift-related achievements', Icons.emoji_events),
+        _action('Popular Member', 'Popularity achievements', Icons.star_outline),
+        _action('Loyal Member', 'Membership achievements', Icons.loyalty),
+        _action('Event Winner', 'Event achievements', Icons.military_tech),
+        _action('Friendship Badge', 'Friendship achievements', Icons.handshake),
+        const SizedBox(height: 8),
+        const Text(
+          'Only earned badges should appear here. Badge records are not connected yet.',
+          style: TextStyle(color: Colors.black54),
+        ),
+      ],
+    );
+  }
+
+  Widget _activity() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('PROFILE ACTIVITY'),
+        _action('Recent Profile Visitors', 'People who viewed your profile',
+            Icons.visibility_outlined),
+        _action('Recent Followers', 'Your latest followers',
+            Icons.person_add_alt),
+        _action('Recent Gifts', 'Gifts received recently', Icons.card_giftcard),
+        _action('Friend Activity', 'Recent activity from friends',
+            Icons.people_outline),
+        const SizedBox(height: 8),
+        const Text(
+          'Activity lists will show data after the related Firebase features are connected.',
+          style: TextStyle(color: Colors.black54),
+        ),
+      ],
+    );
+  }
+
+  Widget _privacySafety() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _heading('PRIVACY & SAFETY'),
+        _action('Profile Visibility', 'Public or private profile',
+            Icons.visibility_outlined,
+            onTap: () => _openChild('Profile Visibility')),
+        _action('Who Can Message Me', 'Message permissions',
+            Icons.message_outlined),
+        _action('Friend Request Settings', 'Control who can request friendship',
+            Icons.person_add_alt),
+        _action('Online Status', 'Control online visibility',
+            Icons.circle_outlined),
+        _action('Blocked Users', 'Review and unblock users', Icons.block),
+        _action('Report User', 'Report an account for review',
+            Icons.flag_outlined),
+        const SizedBox(height: 8),
+        const Text(
+          'Your existing Settings > Privacy page remains unchanged.',
+          style: TextStyle(color: Colors.black54),
+        ),
+      ],
+    );
+  }
+
+  Widget _featureContent() {
+    switch (widget.title) {
+      case 'Edit Profile':
+        return _editProfile();
+      case 'Customization Centre':
+        return _customization();
+      case 'Friends Centre':
+        return _friendsCentre();
+      case 'Notifications':
+        return _notifications();
+      case 'Gift Showcase':
+        return _giftShowcase();
+      case 'Royal Badges & Achievements':
+        return _badges();
+      case 'Profile Activity':
+        return _activity();
+      case 'Privacy & Safety':
+        return _privacySafety();
+      case 'Friend Requests':
+        return _emptyFeature(
+          'Friend requests will appear here when the request system is connected.',
+          Icons.person_add_alt_1,
+        );
+      case 'My Friends':
+        return _emptyFeature(
+          'Your accepted friends will appear here. Search and remove controls need the friends database.',
+          Icons.people_outline,
+        );
+      case 'Friend Messages':
+        return _emptyFeature(
+          'Your friend conversations will appear here after messaging is connected.',
+          Icons.chat_bubble_outline,
+        );
+      case 'Blocked Users':
+        return _emptyFeature(
+          'Blocked accounts will appear here after the block system is connected.',
+          Icons.block,
+        );
+      case 'Profile Visibility':
+        return _emptyFeature(
+          'Use Settings > Privacy to change your current profile privacy setting.',
+          Icons.visibility_outlined,
+        );
+      default:
+        return _emptyFeature(
+          'This section is ready for its Firebase feature connection.',
+          Icons.construction_outlined,
+        );
+    }
+  }
+
+  Widget _emptyFeature(String message, IconData icon) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 55, color: darkGold),
+            const SizedBox(height: 15),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: black,
+                fontSize: 15,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    bioController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: widget.title,
+      child: _featureContent(),
+    );
+  }
+}
 
 /* ================= SETTINGS ================= */
 
