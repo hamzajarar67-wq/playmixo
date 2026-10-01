@@ -30,6 +30,46 @@ jobs:
         run: |
           mkdir -p android/app
           cp "google-services (11).json" android/app/google-services.json
+
+
+      - name: Configure Image Cropper
+        run: |
+          mkdir -p android/app/src/main/res/values
+          mkdir -p android/app/src/main/res/values-v35
+
+          cat > android/app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="Ucrop.CropTheme" parent="Theme.AppCompat.Light.NoActionBar"/>
+          </resources>
+          EOF
+
+          cat > android/app/src/main/res/values-v35/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="Ucrop.CropTheme" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+              </style>
+          </resources>
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+
+          activity = '''    <activity
+                  android:name="com.yalantis.ucrop.UCropActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/Ucrop.CropTheme" />'''
+
+          if "com.yalantis.ucrop.UCropActivity" not in s:
+              s = s.replace("</application>", activity + "\n</application>")
+
+          p.write_text(s)
+          PY
+
+          
       - name: Install Android NDK
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
