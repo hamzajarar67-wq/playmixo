@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -3911,10 +3913,26 @@ Future<void> _pickProfilePhoto() async {
     final responseBody = await response.stream.bytesToString();
 
     if (response.statusCode == 200) {
-      _message('Profile photo uploaded successfully.');
-    } else {
-      _message('Upload failed.');
-    }
+  final data = jsonDecode(responseBody);
+  final photoUrl = data['secure_url'];
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user != null && photoUrl != null) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({
+      'photoURL': photoUrl,
+    }, SetOptions(merge: true));
+
+    await user.updatePhotoURL(photoUrl);
+
+    _message('Profile photo saved successfully.');
+  }
+} else {
+  _message('Upload failed.');
+}
   } catch (e) {
     _message('Upload error: $e');
   }
