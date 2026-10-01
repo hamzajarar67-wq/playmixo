@@ -3377,40 +3377,27 @@ Future<void> _pickAndUploadProfilePhoto() async {
     final picker = ImagePicker();
 
     final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 90,
-    );
+  source: ImageSource.gallery,
+  imageQuality: 90,
+);
 
-    if (image == null) return;
+if (image == null) return;
 
-    final photoPath = image.path;
+setState(() {});
 
+ScaffoldMessenger.of(context).showSnackBar(
+  const SnackBar(content: Text('Photo selected successfully!')),
+);
+} catch (e) {
+  if (!mounted) return;
 
-    setState(() => uploadingPhoto = true);
-
-    
-
-    await _auth.currentUser?.reload();
-
-    if (!mounted) return;
-      _message('Photo selected successfully.');
-setState(() => uploadingPhoto = false);
-
-    setState(() {});
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Photo selected successfully!')),
-    );
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Photo upload failed: $e')),
-    );
-  } finally {
-    if (mounted) {
-      setState(() => uploadingPhoto = false);
-    }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Photo selection failed: $e')),
+  );
+} finally {
+  if (mounted) {
+    setState(() => uploadingPhoto = false);
+  }
   }
 }
     
