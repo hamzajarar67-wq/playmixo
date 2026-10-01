@@ -3388,29 +3388,18 @@ Future<void> _pickAndUploadProfilePhoto() async {
 
     setState(() => uploadingPhoto = true);
 
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('profile_photos')
-        .child('${user.uid}.jpg');
-
-    await ref.putFile(File(photoPath));
-
-    final photoUrl = await ref.getDownloadURL();
-
-    await user.updatePhotoURL(photoUrl);
-
-    await _firestore.collection('users').doc(user.uid).set({
-      'photoURL': photoUrl,
-    }, SetOptions(merge: true));
+    
 
     await _auth.currentUser?.reload();
 
     if (!mounted) return;
+      _message('Photo selected successfully.');
+setState(() => uploadingPhoto = false);
 
     setState(() {});
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile picture updated!')),
+      const SnackBar(content: Text('Photo selected successfully!')),
     );
   } catch (e) {
     if (!mounted) return;
