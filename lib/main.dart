@@ -3735,10 +3735,10 @@ class _LanguagePageState extends State<LanguagePage> {
                 child: Row(
                   children: [
                     Icon(
-                      languageChangeEnabled
+                      playmixoLanguageChangeEnabled.value
                           ? Icons.language
                           : Icons.language_outlined,
-                      color: languageChangeEnabled
+                      color: playmixoLanguageChangeEnabled.value
                           ? darkGold
                           : Colors.red,
                     ),
@@ -3748,7 +3748,7 @@ class _LanguagePageState extends State<LanguagePage> {
                         'Language Change',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: languageChangeEnabled
+                          color: playmixoLanguageChangeEnabled.value
                               ? black
                               : Colors.red,
                         ),
@@ -3788,7 +3788,7 @@ class _LanguagePageState extends State<LanguagePage> {
                     ),
                   ),
                   child: ListTile(
-                    onTap: languageChangeEnabled
+                    onTap: playmixoLanguageChangeEnabled.value
                         ? () => _changeLanguage(code)
                         : null,
                     contentPadding: const EdgeInsets.symmetric(
@@ -3799,7 +3799,7 @@ class _LanguagePageState extends State<LanguagePage> {
                       title,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: languageChangeEnabled
+                        color: playmixoLanguageChangeEnabled.value
                             ? black
                             : Colors.black38,
                       ),
