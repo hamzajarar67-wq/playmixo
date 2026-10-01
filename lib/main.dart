@@ -3896,7 +3896,23 @@ Future<void> _pickProfilePhoto() async {
 
   if (image == null) return;
 
-  try {
+final croppedImage = await ImageCropper().cropImage(
+  sourcePath: image.path,
+  aspectRatio: const CropAspectRatio(
+    ratioX: 1,
+    ratioY: 1,
+  ),
+  uiSettings: [
+    AndroidUiSettings(
+      toolbarTitle: 'Crop Profile Photo',
+      lockAspectRatio: true,
+    ),
+  ],
+);
+
+if (croppedImage == null) return;
+
+try {
     final request = http.MultipartRequest(
       'POST',
       Uri.parse(
@@ -3906,7 +3922,7 @@ Future<void> _pickProfilePhoto() async {
 
     request.fields['upload_preset'] = 'playmixo_dp';
     request.files.add(
-      await http.MultipartFile.fromPath('file', image.path),
+      await http.MultipartFile.fromPath('file', croppedImage.path),
     );
 
     final response = await request.send();
