@@ -3363,6 +3363,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String publicUserId = '';
   String bio = '';
   bool loadingProfile = true;
+  bool uploadingPhoto = false;
 
   @override
   void initState() {
