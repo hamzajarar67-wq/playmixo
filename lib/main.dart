@@ -4505,7 +4505,7 @@ class _FAQItem extends StatelessWidget {
             child: Text(
               answer,
               style: const TextStyle(
-                color: Colors.black70,
+                color: Colors.black87,
                 height: 1.5,
               ),
             ),
@@ -4636,7 +4636,7 @@ class _ContactSupportPageState
               child: const Text(
                 'If you need help, write your message below and our support team can review your request.',
                 style: TextStyle(
-                  color: Colors.black70,
+                  color: Colors.black87,
                   height: 1.5,
                 ),
               ),
@@ -4857,7 +4857,7 @@ class _ReportProblemPageState
               child: const Text(
                 'Describe the problem you are experiencing so it can be reviewed.',
                 style: TextStyle(
-                  color: Colors.black70,
+                  color: Colors.black87,
                   height: 1.5,
                 ),
               ),
