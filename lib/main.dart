@@ -510,6 +510,21 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
 void initState() {
   super.initState();
   _loadSavedLanguage();
+
+  Future.delayed(const Duration(seconds: 2), () {
+    if (!mounted) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => user != null
+            ? const MainScreen()
+            : const AuthPage(),
+      ),
+    );
+  });
 }
 
 Future<void> _loadSavedLanguage() async {
@@ -534,22 +549,6 @@ Future<void> _loadSavedLanguage() async {
   }
 }
 
-
-  Future.delayed(const Duration(seconds: 2), () {
-    if (!mounted) return;
-
-    final user = FirebaseAuth.instance.currentUser;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => user != null
-            ? const MainScreen()
-            : const AuthPage(),
-      ),
-    );
-  });
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
