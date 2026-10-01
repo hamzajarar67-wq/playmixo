@@ -3659,10 +3659,7 @@ class SettingItem extends StatelessWidget {
 
 
 
-
-
-
-class LanguagePage extends StatefulWidget {
+  class LanguagePage extends StatefulWidget {
   const LanguagePage({super.key});
 
   @override
@@ -3682,6 +3679,64 @@ class _LanguagePageState extends State<LanguagePage> {
     {'title': 'Indonesian', 'code': 'id'},
     {'title': 'Portuguese', 'code': 'pt'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguageSettings();
+  }
+
+  Future<void> _loadLanguageSettings() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = snapshot.data();
+
+      final language = data?['language'];
+      final languageChange = data?['languageChangeEnabled'];
+
+      if (language is String && language.isNotEmpty) {
+        playmixoLanguageCode.value = language;
+      }
+
+      if (languageChange is bool) {
+        playmixoLanguageChangeEnabled.value = languageChange;
+      }
+    } catch (_) {
+      // Keep current local settings if Firestore fails.
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _toggleLanguageChange(bool value) async {
+    playmixoLanguageChangeEnabled.value = value;
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set(
+          {'languageChangeEnabled': value},
+          SetOptions(merge: true),
+        );
+      } catch (_) {
+        // Keep the local setting even if Firestore fails.
+      }
+    }
+  }
 
   Future<void> _changeLanguage(String code) async {
     if (!playmixoLanguageChangeEnabled.value) return;
@@ -3713,109 +3768,107 @@ class _LanguagePageState extends State<LanguagePage> {
   Widget build(BuildContext context) {
     return AppPage(
       title: tr('language'),
-      child: ValueListenableBuilder<String>(
-        valueListenable: playmixoLanguageCode,
-        builder: (context, selectedLanguage, child) {
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 17,
-                  vertical: 13,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(19),
-                  border: Border.all(
-                    color: const Color(0xFFE5E5E5),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      playmixoLanguageChangeEnabled.value
-                          ? Icons.language
-                          : Icons.language_outlined,
-                      color: playmixoLanguageChangeEnabled.value
-                          ? darkGold
-                          : Colors.red,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: playmixoLanguageChangeEnabled,
+        builder: (context, languageEnabled, child) {
+          return ValueListenableBuilder<String>(
+            valueListenable: playmixoLanguageCode,
+            builder: (context, selectedLanguage, child) {
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 17,
+                      vertical: 13,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Language Change',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: playmixoLanguageChangeEnabled.value
-                              ? black
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: const Color(0xFFE5E5E5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          languageEnabled
+                              ? Icons.language
+                              : Icons.language_outlined,
+                          color: languageEnabled
+                              ? darkGold
                               : Colors.red,
                         ),
-                      ),
-                    ),
-                    ValueListenableBuilder<bool>(
-  valueListenable: playmixoLanguageChangeEnabled,
-  builder: (context, languageEnabled, child) {
-    return Switch(
-      value: languageEnabled,
-      activeThumbColor: gold,
-      onChanged: (value) {
-        playmixoLanguageChangeEnabled.value = value;
-      },
-    );
-  },
-),
-                  ],
-                ),
-              ),
-
-              ...languages.map((language) {
-                final code = language['code']!;
-                final title = language['title']!;
-                final selected = selectedLanguage == code;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 11),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(19),
-                    border: Border.all(
-                      color: selected
-                          ? darkGold
-                          : const Color(0xFFE5E5E5),
-                      width: selected ? 1.5 : 1,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Language Change',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: languageEnabled
+                                  ? black
+                                  : Colors.red,
+                            ),
+                          ),
+                        ),
+                        Switch(
+                          value: languageEnabled,
+                          activeThumbColor: gold,
+                          onChanged: _toggleLanguageChange,
+                        ),
+                      ],
                     ),
                   ),
-                  child: ListTile(
-                    onTap: playmixoLanguageChangeEnabled.value
-                        ? () => _changeLanguage(code)
-                        : null,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 17,
-                      vertical: 3,
-                    ),
-                    title: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: playmixoLanguageChangeEnabled.value
-                            ? black
-                            : Colors.black38,
+
+                  ...languages.map((language) {
+                    final code = language['code']!;
+                    final title = language['title']!;
+                    final selected = selectedLanguage == code;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 11),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(19),
+                        border: Border.all(
+                          color: selected
+                              ? darkGold
+                              : const Color(0xFFE5E5E5),
+                          width: selected ? 1.5 : 1,
+                        ),
                       ),
-                    ),
-                    trailing: Icon(
-                      selected
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
-                      color: selected
-                          ? darkGold
-                          : Colors.black38,
-                    ),
-                  ),
-                );
-              }),
-            ],
+                      child: ListTile(
+                        onTap: languageEnabled
+                            ? () => _changeLanguage(code)
+                            : null,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 17,
+                          vertical: 3,
+                        ),
+                        title: Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: languageEnabled
+                                ? black
+                                : Colors.black38,
+                          ),
+                        ),
+                        trailing: Icon(
+                          selected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_off,
+                          color: selected
+                              ? darkGold
+                              : Colors.black38,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              );
+            },
           );
         },
       ),
