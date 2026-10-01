@@ -3486,18 +3486,7 @@ SettingItem(
   },
 ),
 
-SettingItem(
-  Icons.language,
-  tr('language'),
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LanguagePage(),
-      ),
-    );
-  },
-),
+
 
           SettingItem(
   Icons.help_outline,
