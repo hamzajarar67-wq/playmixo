@@ -629,24 +629,19 @@ class PlaymixoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: playmixoLanguageCode,
-      builder: (context, languageCode, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Playmixo',
-          theme: ThemeData(
-            useMaterial3: true,
-            scaffoldBackgroundColor: bg,
-            fontFamily: 'Roboto',
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: gold,
-              brightness: Brightness.light,
-            ),
-          ),
-          home: const PlaymixoSplash(),
-        );
-      },
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Playmixo',
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: bg,
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: gold,
+          brightness: Brightness.light,
+        ),
+      ),
+      home: const PlaymixoSplash(),
     );
   }
 }
