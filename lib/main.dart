@@ -1,8 +1,15 @@
+import 'dart:math';
+
+
+
+
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/services.dart';
 
 
 final ValueNotifier<String> playmixoLanguageCode =
@@ -4611,6 +4618,108 @@ class AccountPage extends StatelessWidget {
   }
 }
 
+
+
+Future<String> _getOrCreatePublicUserId() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    throw Exception('User is not signed in.');
+  }
+
+  final firestore = FirebaseFirestore.instance;
+  final userRef = firestore.collection('users').doc(user.uid);
+
+  // Check if this account already has a public ID.
+  final userSnapshot = await userRef.get();
+  final userData = userSnapshot.data();
+
+  final existingId = userData?['userId']?.toString() ?? '';
+
+  if (RegExp(r'^\d{6}$').hasMatch(existingId)) {
+    return existingId;
+  }
+
+  // Try 123456 first.
+  final firstIdRef =
+      firestore.collection('public_user_ids').doc('123456');
+
+  final firstIdResult = await firestore.runTransaction<String>(
+    (transaction) async {
+      final reservation = await transaction.get(firstIdRef);
+
+      if (!reservation.exists) {
+        transaction.set(firstIdRef, {
+          'uid': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        return '123456';
+      }
+
+      return '';
+    },
+  );
+
+  if (firstIdResult == '123456') {
+    await userRef.set({
+      'userId': '123456',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    return '123456';
+  }
+
+  // After 123456 is taken, generate a random unique 6-digit ID.
+  final random = Random();
+
+  for (int attempt = 0; attempt < 30; attempt++) {
+    final number = 100000 + random.nextInt(900000);
+    final candidate = number.toString();
+
+    if (candidate == '123456') {
+      continue;
+    }
+
+    final idRef =
+        firestore.collection('public_user_ids').doc(candidate);
+
+    final result = await firestore.runTransaction<String>(
+      (transaction) async {
+        final reservation = await transaction.get(idRef);
+
+        if (reservation.exists) {
+          return '';
+        }
+
+        transaction.set(idRef, {
+          'uid': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        return candidate;
+      },
+    );
+
+    if (result.isNotEmpty) {
+      await userRef.set({
+        'userId': result,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      return result;
+    }
+  }
+
+  throw Exception('Could not create a unique User ID.');
+}
+
+
+
+
+
+
+
 class AccountInformationPage extends StatefulWidget {
   const AccountInformationPage({super.key});
 
@@ -4630,7 +4739,7 @@ class _AccountInformationPageState
   String name = '';
   String email = '';
   String phone = '';
-  String uid = '';
+  String userId = '';
 
   @override
   void initState() {
@@ -4661,20 +4770,25 @@ class _AccountInformationPageState
 
       if (!mounted) return;
 
-      setState(() {
-        name = data?['name']?.toString() ?? '';
-        email = user.email ?? '';
-        phone = user.phoneNumber ?? '';
-        uid = user.uid;
-        isLoading = false;
-      });
+      final generatedUserId =
+    await _getOrCreatePublicUserId();
+
+if (!mounted) return;
+
+setState(() {
+  name = data?['name']?.toString() ?? '';
+  email = user.email ?? '';
+  phone = user.phoneNumber ?? '';
+  userId = generatedUserId;
+  isLoading = false;
+});
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
         email = user.email ?? '';
         phone = user.phoneNumber ?? '';
-        uid = user.uid;
+        userId = '';
         isLoading = false;
       });
     }
@@ -4719,12 +4833,81 @@ class _AccountInformationPageState
     );
   }
 
+  Widget _userIdBox(String title, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 15,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value.isEmpty ? 'Not available' : value,
+                  style: const TextStyle(
+                    color: black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (value.isNotEmpty)
+                IconButton(
+                  tooltip: 'Copy',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(
+                    Icons.copy_outlined,
+                    size: 18,
+                    color: Colors.black54,
+                  ),
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: value),
+                    );
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('User ID copied'),
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-Widget build(BuildContext context) {
-  return AppPage(
-    title: tr('account_information'),
-    child: isLoading
-        ? const Center(
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: tr('account_information'),
+      child: isLoading
+          ? const Center(
               child: CircularProgressIndicator(
                 color: gold,
               ),
@@ -4738,14 +4921,18 @@ Widget build(BuildContext context) {
               ),
               children: [
                 _infoBox(tr('name'), name),
-               _infoBox(tr('email'), email),
-               _infoBox(tr('mobile_number'), phone),
-               _infoBox(tr('uid'), uid),
+                _infoBox(tr('email'), email),
+                _infoBox(tr('mobile_number'), phone),
+                _userIdBox(tr('uid'), userId),
               ],
             ),
     );
   }
 }
+
+
+
+
 
 class ChangeEmailPage extends StatefulWidget {
   const ChangeEmailPage({super.key});
