@@ -4883,40 +4883,43 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(17, 18, 17, 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: black,
-                    borderRadius: BorderRadius.circular(13),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 18, 17, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: black,
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome,
+                      color: gold,
+                      size: 21,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.auto_awesome,
-                    color: gold,
-                    size: 21,
+                  const SizedBox(width: 11),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                      color: black,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 11),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w900,
-                    color: black,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(child: child),
-        ],
+            Expanded(child: child),
+          ],
+        ),
       ),
     );
   }
