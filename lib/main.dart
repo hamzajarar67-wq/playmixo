@@ -4014,7 +4014,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
           'Change Profile Photo',
           'Photo upload will be connected in the next step',
           Icons.photo_camera_outlined,
-          onTap: _pickAndUploadProfilePhoto,
+          onTap: () => _message('Photo upload is not connected yet.'),
         ),
         const SizedBox(height: 10),
         SizedBox(
