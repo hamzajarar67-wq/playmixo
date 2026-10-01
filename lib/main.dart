@@ -3350,9 +3350,89 @@ class WalletBalance extends StatelessWidget {
 }
 
 /* ================= PROFILE ================= */
-
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  String publicUserId = '';
+  String bio = '';
+  bool loadingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      if (mounted) {
+        setState(() => loadingProfile = false);
+      }
+      return;
+    }
+
+    try {
+      final doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = doc.data() ?? {};
+
+      final savedBio = (data['bio'] ?? '').toString();
+
+      String generatedUserId = '';
+
+      try {
+        generatedUserId = await _getOrCreatePublicUserId();
+      } catch (_) {
+        generatedUserId =
+            (data['userId'] ?? '').toString();
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        publicUserId = generatedUserId;
+        bio = savedBio;
+        loadingProfile = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        publicUserId = '';
+        bio = '';
+        loadingProfile = false;
+      });
+    }
+  }
+
+  Future<void> _copyUserId() async {
+    if (publicUserId.isEmpty) return;
+
+    await Clipboard.setData(
+      ClipboardData(text: publicUserId),
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('User ID copied.'),
+      ),
+    );
+  }
 
   void _open(BuildContext context, String title) {
     Navigator.push(
@@ -3360,12 +3440,14 @@ class ProfilePage extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => ProfileFeaturePage(title: title),
       ),
-    );
+    ).then((_) {
+      _loadProfileData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
 
     return AppPage(
       title: 'Profile',
@@ -3377,7 +3459,10 @@ class ProfilePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: black,
               borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: gold, width: 1.2),
+              border: Border.all(
+                color: gold,
+                width: 1.2,
+              ),
             ),
             child: Column(
               children: [
@@ -3385,7 +3470,10 @@ class ProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: gold, width: 3),
+                    border: Border.all(
+                      color: gold,
+                      width: 3,
+                    ),
                   ),
                   child: CircleAvatar(
                     radius: 43,
@@ -3394,11 +3482,17 @@ class ProfilePage extends StatelessWidget {
                         ? NetworkImage(user!.photoURL!)
                         : null,
                     child: user?.photoURL == null
-                        ? const Icon(Icons.person, size: 50, color: black)
+                        ? const Icon(
+                            Icons.person,
+                            size: 50,
+                            color: black,
+                          )
                         : null,
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 Text(
                   user?.displayName?.isNotEmpty == true
                       ? user!.displayName!
@@ -3409,15 +3503,68 @@ class ProfilePage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'UID: ${user?.uid ?? 'Not signed in'}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white60, fontSize: 11),
-                ),
+
+                const SizedBox(height: 5),
+
+                if (loadingProfile)
+                  const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: gold,
+                    ),
+                  )
+                else if (publicUserId.isNotEmpty)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        publicUserId,
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      InkWell(
+                        onTap: _copyUserId,
+                        borderRadius: BorderRadius.circular(20),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.copy_outlined,
+                            size: 15,
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                if (bio.trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    bio,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 22),
-                Container(height: 1, color: Colors.white24),
+
+                Container(
+                  height: 1,
+                  color: Colors.white24,
+                ),
+
                 const SizedBox(height: 18),
+
                 const Row(
                   children: [
                     ProfileStat('Followers'),
@@ -3429,50 +3576,54 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(height: 18),
+
           const _ProfileSectionTitle('PROFILE CENTRE'),
+
           _ProfileMenuTile(
             icon: Icons.edit_outlined,
             title: 'Edit Profile',
             subtitle: 'Username, profile photo and bio',
             onTap: () => _open(context, 'Edit Profile'),
           ),
+
           _ProfileMenuTile(
             icon: Icons.auto_awesome,
             title: 'Customization Centre',
             subtitle: 'Frames, themes and ornaments',
             onTap: () => _open(context, 'Customization Centre'),
           ),
+
           _ProfileMenuTile(
             icon: Icons.people_outline,
             title: 'Friends Centre',
             subtitle: 'Requests, friends, messages and blocked users',
             onTap: () => _open(context, 'Friends Centre'),
           ),
-          _ProfileMenuTile(
-            icon: Icons.notifications_none,
-            title: 'Notifications',
-            subtitle: 'Choose which alerts you receive',
-            onTap: () => _open(context, 'Notifications'),
-          ),
+
           _ProfileMenuTile(
             icon: Icons.card_giftcard,
             title: 'Gift Showcase',
             subtitle: 'Your gifts and collection',
             onTap: () => _open(context, 'Gift Showcase'),
           ),
+
           _ProfileMenuTile(
             icon: Icons.workspace_premium_outlined,
             title: 'Royal Badges & Achievements',
             subtitle: 'Your earned badges and achievements',
-            onTap: () => _open(context, 'Royal Badges & Achievements'),
+            onTap: () =>
+                _open(context, 'Royal Badges & Achievements'),
           ),
+
           _ProfileMenuTile(
             icon: Icons.history,
             title: 'Profile Activity',
             subtitle: 'Visitors, followers and recent activity',
             onTap: () => _open(context, 'Profile Activity'),
           ),
+
           _ProfileMenuTile(
             icon: Icons.shield_outlined,
             title: 'Privacy & Safety',
@@ -3923,37 +4074,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     );
   }
 
-  Widget _notifications() {
-    const categories = [
-      'Friend Requests',
-      'Request Accepted',
-      'New Messages',
-      'Gift Received',
-      'Profile Activity',
-      'System Notifications',
-    ];
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _heading('NOTIFICATION PREFERENCES'),
-        const Text(
-          'Notification preferences will be saved to your account when connected.',
-          style: TextStyle(color: Colors.black54),
-        ),
-        const SizedBox(height: 12),
-        ...categories.map(
-          (item) => SwitchListTile(
-            value: true,
-            activeColor: darkGold,
-            title: Text(item, style: const TextStyle(color: black)),
-            onChanged: (_) => _message(
-              'Notification saving is not connected yet.',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  
 
   Widget _giftShowcase() {
     return ListView(
@@ -4047,8 +4168,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
         return _customization();
       case 'Friends Centre':
         return _friendsCentre();
-      case 'Notifications':
-        return _notifications();
+      
       case 'Gift Showcase':
         return _giftShowcase();
       case 'Royal Badges & Achievements':
