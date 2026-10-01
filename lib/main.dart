@@ -510,6 +510,7 @@ class _PlaymixoSplashState extends State<PlaymixoSplash> {
 void initState() {
   super.initState();
   _loadSavedLanguage();
+}
 
 Future<void> _loadSavedLanguage() async {
   final user = FirebaseAuth.instance.currentUser;
