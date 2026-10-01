@@ -3370,7 +3370,74 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _loadProfileData();
   }
+Future<void> _pickAndUploadProfilePhoto() async {
+  final user = _auth.currentUser;
+  if (user == null || uploadingPhoto) return;
 
+  try {
+    final picker = ImagePicker();
+
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 90,
+    );
+
+    if (image == null) return;
+
+    final croppedImage = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Adjust Profile Picture',
+          toolbarColor: black,
+          toolbarWidgetColor: gold,
+          lockAspectRatio: false,
+          hideBottomControls: false,
+        ),
+      ],
+    );
+
+    if (croppedImage == null) return;
+
+    setState(() => uploadingPhoto = true);
+
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('profile_photos')
+        .child('${user.uid}.jpg');
+
+    await ref.putFile(File(croppedImage.path));
+
+    final photoUrl = await ref.getDownloadURL();
+
+    await user.updatePhotoURL(photoUrl);
+
+    await _firestore.collection('users').doc(user.uid).set({
+      'photoURL': photoUrl,
+    }, SetOptions(merge: true));
+
+    await _auth.currentUser?.reload();
+
+    if (!mounted) return;
+
+    setState(() {});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile picture updated!')),
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Photo upload failed: $e')),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => uploadingPhoto = false);
+    }
+  }
+}
+    
   Future<void> _loadProfileData() async {
     final user = _auth.currentUser;
 
@@ -3784,73 +3851,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     _loadProfile();
   }
 
-Future<void> _pickAndUploadProfilePhoto() async {
-  final user = _auth.currentUser;
-  if (user == null || uploadingPhoto) return;
 
-  try {
-    final picker = ImagePicker();
-
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 90,
-    );
-
-    if (image == null) return;
-
-    final croppedImage = await ImageCropper().cropImage(
-      sourcePath: image.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Adjust Profile Picture',
-          toolbarColor: black,
-          toolbarWidgetColor: gold,
-          lockAspectRatio: false,
-          hideBottomControls: false,
-        ),
-      ],
-    );
-
-    if (croppedImage == null) return;
-
-    setState(() => uploadingPhoto = true);
-
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('profile_photos')
-        .child('${user.uid}.jpg');
-
-    await ref.putFile(File(croppedImage.path));
-
-    final photoUrl = await ref.getDownloadURL();
-
-    await user.updatePhotoURL(photoUrl);
-
-    await _firestore.collection('users').doc(user.uid).set({
-      'photoURL': photoUrl,
-    }, SetOptions(merge: true));
-
-    await user.reload();
-
-    if (!mounted) return;
-
-    setState(() {});
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile picture updated!')),
-    );
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Photo upload failed: $e')),
-    );
-  } finally {
-    if (mounted) {
-      setState(() => uploadingPhoto = false);
-    }
-  }
-}
 
     
   Future<void> _loadProfile() async {
