@@ -3894,25 +3894,31 @@ Future<void> _pickProfilePhoto() async {
 
   if (image == null) return;
 
-  _message('Photo selected successfully.');
-}
-    
-
-  void _message(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  void _openChild(String title) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ProfileFeaturePage(title: title),
+  try {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(
+        'https://api.cloudinary.com/v1_1/il3mz1rq/image/upload',
       ),
     );
+
+    request.fields['upload_preset'] = 'playmixo_dp';
+    request.files.add(
+      await http.MultipartFile.fromPath('file', image.path),
+    );
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      _message('Profile photo uploaded successfully.');
+    } else {
+      _message('Upload failed.');
+    }
+  } catch (e) {
+    _message('Upload error: $e');
   }
+}
 
   Widget _heading(String text) {
     return Padding(
