@@ -3384,20 +3384,8 @@ Future<void> _pickAndUploadProfilePhoto() async {
 
     if (image == null) return;
 
-    final croppedImage = await ImageCropper().cropImage(
-      sourcePath: image.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Adjust Profile Picture',
-          toolbarColor: black,
-          toolbarWidgetColor: gold,
-          lockAspectRatio: false,
-          hideBottomControls: false,
-        ),
-      ],
-    );
+    final photoPath = image.path;
 
-    if (croppedImage == null) return;
 
     setState(() => uploadingPhoto = true);
 
@@ -3406,7 +3394,7 @@ Future<void> _pickAndUploadProfilePhoto() async {
         .child('profile_photos')
         .child('${user.uid}.jpg');
 
-    await ref.putFile(File(croppedImage.path));
+    await ref.putFile(File(photoPath));
 
     final photoUrl = await ref.getDownloadURL();
 
