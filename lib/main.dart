@@ -3912,6 +3912,16 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     }
   }
 
+Future<void> _pickProfilePhoto() async {
+  final picker = ImagePicker();
+  final image = await picker.pickImage(source: ImageSource.gallery);
+
+  if (image == null) return;
+
+  _message('Photo selected successfully.');
+}
+    
+
   void _message(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -4014,7 +4024,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
           'Change Profile Photo',
           'Photo upload will be connected in the next step',
           Icons.photo_camera_outlined,
-          onTap: () => _message('Photo upload is not connected yet.'),
+          onTap: _pickProfilePhoto,
         ),
         const SizedBox(height: 10),
         SizedBox(
