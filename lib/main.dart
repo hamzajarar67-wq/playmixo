@@ -4349,180 +4349,619 @@ class HelpCenterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-  title: tr('help_center'),
-  child: ListView(
+      title: 'Help Center',
+      child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
           SettingItem(
-  Icons.question_answer_outlined,
-  tr('faq'),
-  onTap: () {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(tr('faq')),
-          content: const Text(
-            'Frequently asked questions will appear here.',
+            Icons.question_answer_outlined,
+            'FAQ',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FAQPage(),
+                ),
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  },
-),
+
           SettingItem(
-  Icons.support_agent_outlined,
-  tr('contact_support'),
-  onTap: () {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(tr('contact_support')),
-          content: TextField(
-            controller: controller,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'Write your message...',
-              border: OutlineInputBorder(),
-            ),
+            Icons.support_agent_outlined,
+            'Contact Support',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ContactSupportPage(),
+                ),
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                controller.dispose();
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final message = controller.text.trim();
 
-                if (message.isEmpty) return;
-
-                final user = FirebaseAuth.instance.currentUser;
-
-                if (user == null) return;
-
-                await FirebaseFirestore.instance
-                    .collection('support_requests')
-                    .add({
-                  'userId': user.uid,
-                  'email': user.email ?? '',
-                  'message': message,
-                  'createdAt': FieldValue.serverTimestamp(),
-                  'status': 'open',
-                });
-
-                controller.dispose();
-
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Your support request has been sent.',
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Send'),
-            ),
-          ],
-        );
-      },
-    );
-  },
-),
           SettingItem(
-  Icons.report_problem_outlined,
-  tr('report_problem'),
-  onTap: () {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(tr('report_problem')),
-          content: TextField(
-            controller: controller,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'Describe the problem...',
-              border: OutlineInputBorder(),
-            ),
+            Icons.report_problem_outlined,
+            'Report Problem',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ReportProblemPage(),
+                ),
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                controller.dispose();
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final problem = controller.text.trim();
-
-                if (problem.isEmpty) return;
-
-                final user = FirebaseAuth.instance.currentUser;
-
-                if (user == null) return;
-
-                await FirebaseFirestore.instance
-                    .collection('problem_reports')
-                    .add({
-                  'userId': user.uid,
-                  'email': user.email ?? '',
-                  'problem': problem,
-                  'createdAt': FieldValue.serverTimestamp(),
-                  'status': 'open',
-                });
-
-                controller.dispose();
-
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Problem report has been sent.',
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Send'),
-            ),
-          ],
-        );
-      },
-    );
-  },
-),
         ],
       ),
     );
   }
 }
+
+
+/* ================= FAQ PAGE ================= */
+
+class FAQPage extends StatelessWidget {
+  const FAQPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Frequently Asked Questions',
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          _FAQItem(
+            question: 'How do I create an account?',
+            answer:
+                'Create your account using the available sign-in options and complete your profile information.',
+          ),
+
+          _FAQItem(
+            question: 'What are Coins?',
+            answer:
+                'Coins are the main in-app currency used for supported features and activities in Playmixo.',
+          ),
+
+          _FAQItem(
+            question: 'What are Diamonds?',
+            answer:
+                'Diamonds are a separate in-app currency that can be used for supported premium features.',
+          ),
+
+          _FAQItem(
+            question: 'How do I play the game?',
+            answer:
+                'Open the Game section, choose the available game, and follow the instructions shown on the game screen.',
+          ),
+
+          _FAQItem(
+            question: 'How do Rooms work?',
+            answer:
+                'Rooms allow users to join and interact with other users in supported Playmixo activities.',
+          ),
+
+          _FAQItem(
+            question: 'What is the Wallet?',
+            answer:
+                'The Wallet shows your Coins and Diamonds balance and related wallet activity.',
+          ),
+
+          _FAQItem(
+            question: 'What are Gifts?',
+            answer:
+                'Gifts are in-app items that can be sent to other users where the feature is supported.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/* ================= FAQ ITEM ================= */
+
+class _FAQItem extends StatelessWidget {
+  final String question;
+  final String answer;
+
+  const _FAQItem({
+    required this.question,
+    required this.answer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 11),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+      ),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(
+          horizontal: 17,
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(
+          17,
+          0,
+          17,
+          17,
+        ),
+        title: Text(
+          question,
+          style: const TextStyle(
+            color: black,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        iconColor: darkGold,
+        collapsedIconColor: Colors.black54,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              answer,
+              style: const TextStyle(
+                color: Colors.black70,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/* ================= CONTACT SUPPORT PAGE ================= */
+
+class ContactSupportPage extends StatefulWidget {
+  const ContactSupportPage({super.key});
+
+  @override
+  State<ContactSupportPage> createState() =>
+      _ContactSupportPageState();
+}
+
+class _ContactSupportPageState
+    extends State<ContactSupportPage> {
+  final TextEditingController _controller =
+      TextEditingController();
+
+  bool isSending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendSupportRequest() async {
+    final message = _controller.text.trim();
+
+    if (message.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please write your message first.'),
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in first.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isSending = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('support_requests')
+          .add({
+        'userId': user.uid,
+        'email': user.email ?? '',
+        'message': message,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'open',
+      });
+
+      if (!mounted) return;
+
+      setState(() {
+        isSending = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Your support request has been sent.',
+          ),
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isSending = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not send your support request.',
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Contact Support',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          4,
+          16,
+          24,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(17),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(19),
+                border: Border.all(
+                  color: const Color(0xFFE5E5E5),
+                ),
+              ),
+              child: const Text(
+                'If you need help, write your message below and our support team can review your request.',
+                style: TextStyle(
+                  color: Colors.black70,
+                  height: 1.5,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            TextField(
+              controller: _controller,
+              maxLines: 7,
+              textInputAction: TextInputAction.newline,
+              decoration: InputDecoration(
+                hintText: 'Write your message...',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(19),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5E5E5),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(19),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5E5E5),
+                  ),
+                ),
+              ),
+            ),
+
+            const Spacer(),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isSending
+                        ? null
+                        : () {
+                            Navigator.pop(context);
+                          },
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(
+                        double.infinity,
+                        52,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed:
+                        isSending ? null : _sendSupportRequest,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: black,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(
+                        double.infinity,
+                        52,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: isSending
+                        ? const SizedBox(
+                            width: 21,
+                            height: 21,
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: gold,
+                            ),
+                          )
+                        : const Text(
+                            'Send',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/* ================= REPORT PROBLEM PAGE ================= */
+
+class ReportProblemPage extends StatefulWidget {
+  const ReportProblemPage({super.key});
+
+  @override
+  State<ReportProblemPage> createState() =>
+      _ReportProblemPageState();
+}
+
+class _ReportProblemPageState
+    extends State<ReportProblemPage> {
+  final TextEditingController _controller =
+      TextEditingController();
+
+  bool isSending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendProblemReport() async {
+    final problem = _controller.text.trim();
+
+    if (problem.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please describe the problem first.'),
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in first.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isSending = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('problem_reports')
+          .add({
+        'userId': user.uid,
+        'email': user.email ?? '',
+        'problem': problem,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'open',
+      });
+
+      if (!mounted) return;
+
+      setState(() {
+        isSending = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Problem report has been sent.',
+          ),
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isSending = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not send the problem report.',
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Report Problem',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          4,
+          16,
+          24,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(17),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(19),
+                border: Border.all(
+                  color: const Color(0xFFE5E5E5),
+                ),
+              ),
+              child: const Text(
+                'Describe the problem you are experiencing so it can be reviewed.',
+                style: TextStyle(
+                  color: Colors.black70,
+                  height: 1.5,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            TextField(
+              controller: _controller,
+              maxLines: 7,
+              textInputAction: TextInputAction.newline,
+              decoration: InputDecoration(
+                hintText: 'Describe the problem...',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(19),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5E5E5),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(19),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5E5E5),
+                  ),
+                ),
+              ),
+            ),
+
+            const Spacer(),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isSending
+                        ? null
+                        : () {
+                            Navigator.pop(context);
+                          },
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(
+                        double.infinity,
+                        52,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed:
+                        isSending ? null : _sendProblemReport,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: black,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(
+                        double.infinity,
+                        52,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: isSending
+                        ? const SizedBox(
+                            width: 21,
+                            height: 21,
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: gold,
+                            ),
+                          )
+                        : const Text(
+                            'Send',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+          
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
