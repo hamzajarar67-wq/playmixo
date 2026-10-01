@@ -638,10 +638,15 @@ class PlaymixoApp extends StatelessWidget {
         fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(
           seedColor: gold,
-          brightness: Brightness.light,
+        brightness: Brightness.light,
         ),
       ),
-      home: const PlaymixoSplash(),
+      home: ValueListenableBuilder<String>(
+        valueListenable: playmixoLanguageCode,
+        builder: (context, language, child) {
+          return const PlaymixoSplash();
+        },
+      ),
     );
   }
 }
@@ -3657,143 +3662,161 @@ class SettingItem extends StatelessWidget {
 
 
 
-class LanguagePage extends StatelessWidget {
+class LanguagePage extends StatefulWidget {
   const LanguagePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: playmixoLanguageCode,
-      builder: (context, selectedLanguage, child) {
-        return AppPage(
-          title: tr('language'),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-            children: [
-              _LanguageOption(
-                title: 'English',
-                code: 'en',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Urdu',
-                code: 'ur',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Hindi',
-                code: 'hi',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Arabic',
-                code: 'ar',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Bengali',
-                code: 'bn',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Turkish',
-                code: 'tr',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Spanish',
-                code: 'es',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'French',
-                code: 'fr',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Indonesian',
-                code: 'id',
-                selectedLanguage: selectedLanguage,
-              ),
-              _LanguageOption(
-                title: 'Portuguese',
-                code: 'pt',
-                selectedLanguage: selectedLanguage,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  State<LanguagePage> createState() => _LanguagePageState();
 }
 
+class _LanguagePageState extends State<LanguagePage> {
+  bool languageChangeEnabled = true;
 
+  final List<Map<String, String>> languages = [
+    {'title': 'English', 'code': 'en'},
+    {'title': 'Urdu', 'code': 'ur'},
+    {'title': 'Hindi', 'code': 'hi'},
+    {'title': 'Arabic', 'code': 'ar'},
+    {'title': 'Bengali', 'code': 'bn'},
+    {'title': 'Turkish', 'code': 'tr'},
+    {'title': 'Spanish', 'code': 'es'},
+    {'title': 'French', 'code': 'fr'},
+    {'title': 'Indonesian', 'code': 'id'},
+    {'title': 'Portuguese', 'code': 'pt'},
+  ];
 
-class _LanguageOption extends StatelessWidget {
-  final String title;
-  final String code;
-  final String selectedLanguage;
+  Future<void> _changeLanguage(String code) async {
+    if (!languageChangeEnabled) return;
 
-  const _LanguageOption({
-    required this.title,
-    required this.code,
-    required this.selectedLanguage,
-  });
+    playmixoLanguageCode.value = code;
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set(
+          {'language': code},
+          SetOptions(merge: true),
+        );
+      } catch (_) {
+        // Keep the language changed locally even if Firestore fails.
+      }
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = selectedLanguage == code;
+    return AppPage(
+      title: tr('language'),
+      child: ValueListenableBuilder<String>(
+        valueListenable: playmixoLanguageCode,
+        builder: (context, selectedLanguage, child) {
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 17,
+                  vertical: 13,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(19),
+                  border: Border.all(
+                    color: const Color(0xFFE5E5E5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      languageChangeEnabled
+                          ? Icons.language
+                          : Icons.language_outlined,
+                      color: languageChangeEnabled
+                          ? darkGold
+                          : Colors.red,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Language Change',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: languageChangeEnabled
+                              ? black
+                              : Colors.red,
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      value: languageChangeEnabled,
+                      activeThumbColor: gold,
+                      onChanged: (value) {
+                        setState(() {
+                          languageChangeEnabled = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 11),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(19),
-        border: Border.all(
-          color: const Color(0xFFE5E5E5),
-        ),
-      ),
-      child: ListTile(
-        onTap: () async {
-  playmixoLanguageCode.value = code;
+              ...languages.map((language) {
+                final code = language['code']!;
+                final title = language['title']!;
+                final selected = selectedLanguage == code;
 
-  final user = FirebaseAuth.instance.currentUser;
-
-  if (user != null) {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .set(
-      {
-        'language': code,
-      },
-      SetOptions(merge: true),
-    );
-  }
-},
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 17,
-          vertical: 3,
-        ),
-        leading: Icon(
-          Icons.language,
-          color: isSelected ? darkGold : Colors.black54,
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: black,
-          ),
-        ),
-        trailing: Icon(
-          isSelected
-              ? Icons.check_circle
-              : Icons.cancel,
-          color: isSelected ? darkGold : Colors.red,
-          size: 22,
-        ),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 11),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(19),
+                    border: Border.all(
+                      color: selected
+                          ? darkGold
+                          : const Color(0xFFE5E5E5),
+                      width: selected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: ListTile(
+                    onTap: languageChangeEnabled
+                        ? () => _changeLanguage(code)
+                        : null,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 17,
+                      vertical: 3,
+                    ),
+                    title: Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: languageChangeEnabled
+                            ? black
+                            : Colors.black38,
+                      ),
+                    ),
+                    trailing: Icon(
+                      selected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: selected
+                          ? darkGold
+                          : Colors.black38,
+                    ),
+                  ),
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }
