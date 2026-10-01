@@ -507,9 +507,9 @@ class PlaymixoSplash extends StatefulWidget {
 
 class _PlaymixoSplashState extends State<PlaymixoSplash> {
   @override
-void initState() {
-  super.initState();
-  _loadSavedLanguage();
+  void initState() {
+    super.initState();
+    _loadSavedLanguage();
 
   Future.delayed(const Duration(seconds: 2), () {
     if (!mounted) return;
@@ -525,9 +525,9 @@ void initState() {
       ),
     );
   });
-}
+  }
 
-Future<void> _loadSavedLanguage() async {
+  Future<void> _loadSavedLanguage() async {
   final user = FirebaseAuth.instance.currentUser;
 
   if (user == null) return;
@@ -548,7 +548,6 @@ Future<void> _loadSavedLanguage() async {
     // Keep English if language cannot be loaded.
   }
 }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -3502,7 +3501,7 @@ SettingItem(
 
           SettingItem(
   Icons.help_outline,
-  'Help Center',
+  tr('help_center'),
   onTap: () {
     Navigator.push(
       context,
@@ -3597,12 +3596,12 @@ content: Text(
   },
 ),
 
-
         ],
       ),
     );
   }
 }
+
 
 /* ================= SETTING ITEM ================= */
 
@@ -3672,7 +3671,7 @@ class LanguagePage extends StatelessWidget {
       valueListenable: playmixoLanguageCode,
       builder: (context, selectedLanguage, child) {
         return AppPage(
-          title: 'Language',
+          title: tr('language'),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
             children: [
@@ -4208,7 +4207,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Change Password',
+      title: tr('change_password'),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         child: Column(
@@ -4217,7 +4216,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               controller: passwordController,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: 'New Password',
+                labelText: tr('new_password'),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -4226,7 +4225,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               controller: confirmPasswordController,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: 'Confirm Password',
+                labelText: tr('confirm_password'),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -4238,7 +4237,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 onPressed: isLoading ? null : changePassword,
                 child: isLoading
                     ? const CircularProgressIndicator()
-                    : const Text('Change Password'),
+                    : Text(tr('change_password')),
               ),
             ),
           ],
@@ -4653,7 +4652,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      title: 'Privacy',
+      title: tr('privacy'),
       child: isLoading
     ? const Center(
         child: CircularProgressIndicator(
