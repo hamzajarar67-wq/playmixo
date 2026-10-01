@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 final ValueNotifier<String> playmixoLanguageCode =
     ValueNotifier<String>('en');
+final ValueNotifier<bool> playmixoLanguageChangeEnabled =
+    ValueNotifier<bool>(true);
 
 /* ================= SPLASH ================= */
 
@@ -623,34 +625,32 @@ const black = Color(0xFF111111);
 const bg = Color(0xFFF6F6F4);
 
 /* ================= APP ================= */
-
 class PlaymixoApp extends StatelessWidget {
   const PlaymixoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Playmixo',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: bg,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: gold,
-        brightness: Brightness.light,
-        ),
-      ),
-      home: ValueListenableBuilder<String>(
-        valueListenable: playmixoLanguageCode,
-        builder: (context, language, child) {
-          return const PlaymixoSplash();
-        },
-      ),
+    return ValueListenableBuilder<String>(
+      valueListenable: playmixoLanguageCode,
+      builder: (context, language, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Playmixo',
+          theme: ThemeData(
+            useMaterial3: true,
+            scaffoldBackgroundColor: bg,
+            fontFamily: 'Roboto',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: gold,
+              brightness: Brightness.light,
+            ),
+          ),
+          home: const PlaymixoSplash(),
+        );
+      },
     );
   }
 }
-
 /* ================= AUTH PAGE ================= */
 
 class AuthPage extends StatefulWidget {
@@ -3670,8 +3670,6 @@ class LanguagePage extends StatefulWidget {
 }
 
 class _LanguagePageState extends State<LanguagePage> {
-  bool languageChangeEnabled = true;
-
   final List<Map<String, String>> languages = [
     {'title': 'English', 'code': 'en'},
     {'title': 'Urdu', 'code': 'ur'},
@@ -3686,7 +3684,7 @@ class _LanguagePageState extends State<LanguagePage> {
   ];
 
   Future<void> _changeLanguage(String code) async {
-    if (!languageChangeEnabled) return;
+    if (!playmixoLanguageChangeEnabled.value) return;
 
     playmixoLanguageCode.value = code;
 
@@ -3756,15 +3754,18 @@ class _LanguagePageState extends State<LanguagePage> {
                         ),
                       ),
                     ),
-                    Switch(
-                      value: languageChangeEnabled,
-                      activeThumbColor: gold,
-                      onChanged: (value) {
-                        setState(() {
-                          languageChangeEnabled = value;
-                        });
-                      },
-                    ),
+                    ValueListenableBuilder<bool>(
+  valueListenable: playmixoLanguageChangeEnabled,
+  builder: (context, languageEnabled, child) {
+    return Switch(
+      value: languageEnabled,
+      activeThumbColor: gold,
+      onChanged: (value) {
+        playmixoLanguageChangeEnabled.value = value;
+      },
+    );
+  },
+),
                   ],
                 ),
               ),
