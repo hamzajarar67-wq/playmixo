@@ -3919,7 +3919,23 @@ Future<void> _pickProfilePhoto() async {
     _message('Upload error: $e');
   }
 }
+void _message(String message) {
+  if (!mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
 
+void _openChild(String title) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ProfileFeaturePage(title: title),
+    ),
+  );
+}
+
+    
   Widget _heading(String text) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 12),
