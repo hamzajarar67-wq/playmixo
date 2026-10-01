@@ -4215,19 +4215,19 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: tr('new_password'),
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(
+  labelText: tr('new_password'),
+  border: const OutlineInputBorder(),
+),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: tr('confirm_password'),
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(
+  labelText: tr('confirm_password'),
+  border: const OutlineInputBorder(),
+),
             ),
             const SizedBox(height: 16),
             SizedBox(
