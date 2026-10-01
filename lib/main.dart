@@ -4354,23 +4354,175 @@ class HelpCenterPage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
           SettingItem(
-            Icons.question_answer_outlined,
-           tr('faq'),
+  Icons.question_answer_outlined,
+  tr('faq'),
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(tr('faq')),
+          content: const Text(
+            'Frequently asked questions will appear here.',
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
           SettingItem(
-            Icons.support_agent_outlined,
-            tr('contact_support'),
+  Icons.support_agent_outlined,
+  tr('contact_support'),
+  onTap: () {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(tr('contact_support')),
+          content: TextField(
+            controller: controller,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              hintText: 'Write your message...',
+              border: OutlineInputBorder(),
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                controller.dispose();
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final message = controller.text.trim();
+
+                if (message.isEmpty) return;
+
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user == null) return;
+
+                await FirebaseFirestore.instance
+                    .collection('support_requests')
+                    .add({
+                  'userId': user.uid,
+                  'email': user.email ?? '',
+                  'message': message,
+                  'createdAt': FieldValue.serverTimestamp(),
+                  'status': 'open',
+                });
+
+                controller.dispose();
+
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Your support request has been sent.',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
           SettingItem(
-            Icons.report_problem_outlined,
-            tr('report_problem'),
+  Icons.report_problem_outlined,
+  tr('report_problem'),
+  onTap: () {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(tr('report_problem')),
+          content: TextField(
+            controller: controller,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              hintText: 'Describe the problem...',
+              border: OutlineInputBorder(),
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                controller.dispose();
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final problem = controller.text.trim();
+
+                if (problem.isEmpty) return;
+
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user == null) return;
+
+                await FirebaseFirestore.instance
+                    .collection('problem_reports')
+                    .add({
+                  'userId': user.uid,
+                  'email': user.email ?? '',
+                  'problem': problem,
+                  'createdAt': FieldValue.serverTimestamp(),
+                  'status': 'open',
+                });
+
+                controller.dispose();
+
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Problem report has been sent.',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
         ],
       ),
     );
   }
 }
-
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
