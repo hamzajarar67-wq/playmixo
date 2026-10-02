@@ -4962,6 +4962,15 @@ Widget _primeCollection() {
       fit: BoxFit.contain,
     );
   }
+  if (name == 'Royal Majesty') {
+    return Image.asset(
+      'assets/prime_frames/royal_majesty.png',
+      width: 155,
+      height: 155,
+      fit: BoxFit.contain,
+    );
+  }
+        
   Color outer1 = gold;
   Color outer2 = const Color(0xFF76500B);
   IconData centerIcon = Icons.person;
