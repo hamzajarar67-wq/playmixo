@@ -3570,6 +3570,17 @@ ScaffoldMessenger.of(context).showSnackBar(
             : null,
       ),
 
+              // PRIME FRAME
+      if (selectedFrame == 'Imperial Crown')
+        IgnorePointer(
+          child: Image.asset(
+            'assets/prime_frames/imperial_crown.png',
+            width: 112,
+            height: 112,
+            fit: BoxFit.contain,
+          ),
+        ),
+
       // CROWN
       const Positioned(
         top: -13,
