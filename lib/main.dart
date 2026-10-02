@@ -4077,107 +4077,415 @@ void _openChild(String title) {
   }
 
   Widget _customization() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _heading('PROFILE PREVIEW'),
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: black,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: gold, width: 1.2),
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
+    children: [
+      // ================= PREMIUM HEADER =================
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF090909),
+              Color(0xFF211807),
+              Color(0xFF090909),
+            ],
           ),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 42,
-                backgroundColor: gold,
-                child: const Icon(Icons.person, color: black, size: 46),
+          border: Border.all(
+            color: gold.withOpacity(.65),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: gold.withOpacity(.18),
+              blurRadius: 22,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: gold.withOpacity(.14),
+                    border: Border.all(
+                      color: gold.withOpacity(.55),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: gold,
+                    size: 25,
+                  ),
+                ),
+                const SizedBox(width: 13),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CUSTOMIZATION CENTRE',
+                        style: TextStyle(
+                          color: gold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Make your profile truly yours',
+                        style: TextStyle(
+                          color: Colors.white60,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // ================= LIVE PREVIEW =================
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                vertical: 22,
+                horizontal: 16,
               ),
-              const SizedBox(height: 10),
-              Text(
-                usernameController.text.isEmpty
-                    ? 'Playmixo User'
-                    : usernameController.text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(.07),
+                    Colors.white.withOpacity(.02),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(.10),
                 ),
               ),
-              Text(
-                '$selectedFrame • $selectedOrnament',
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
+              child: Column(
+                children: [
+                  const Text(
+                    'LIVE PROFILE PREVIEW',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 112,
+                        height: 112,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFFFFD76A),
+                              Color(0xFF8F650D),
+                              Color(0xFFFFE7A1),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: gold.withOpacity(.30),
+                              blurRadius: 22,
+                              spreadRadius: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF17130D),
+                          border: Border.all(
+                            color: gold,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: gold,
+                          size: 52,
+                        ),
+                      ),
+
+                      if (selectedOrnament != 'None')
+                        Positioned(
+                          top: -7,
+                          child: Icon(
+                            selectedOrnament == 'Crown'
+                                ? Icons.workspace_premium
+                                : selectedOrnament == 'Wings'
+                                    ? Icons.flight
+                                    : selectedOrnament == 'Dragon'
+                                        ? Icons.local_fire_department
+                                        : selectedOrnament == 'Flowers'
+                                            ? Icons.local_florist
+                                            : Icons.auto_awesome,
+                            color: gold,
+                            size: 31,
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 13),
+
+                  Text(
+                    usernameController.text.isEmpty
+                        ? 'JANAN'
+                        : usernameController.text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    selectedFrame,
+                    style: const TextStyle(
+                      color: gold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    '$selectedTheme  •  $selectedOrnament',
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 5),
-              Text(
-                'Theme: $selectedTheme',
-                style: const TextStyle(color: gold, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+
+      const SizedBox(height: 24),
+
+      _heading('PROFILE COLLECTIONS'),
+
+      // ================= PRIME =================
+      _customCollectionCard(
+        icon: Icons.workspace_premium,
+        title: 'PRIME',
+        subtitle: 'Premium profile frames & royal looks',
+        badge: 'PREMIUM',
+        gradient: const [
+          Color(0xFF3B2908),
+          Color(0xFF080808),
+        ],
+        onTap: () => _openChild('Prime'),
+      ),
+
+      // ================= THEMES =================
+      _customCollectionCard(
+        icon: Icons.palette_outlined,
+        title: 'THEMES',
+        subtitle: 'Transform the look behind your profile',
+        badge: 'COLLECTION',
+        gradient: const [
+          Color(0xFF281343),
+          Color(0xFF090711),
+        ],
+        onTap: () => _openChild('Themes'),
+      ),
+
+      // ================= ORNAMENTS =================
+      _customCollectionCard(
+        icon: Icons.auto_awesome,
+        title: 'ORNAMENTS',
+        subtitle: 'Beautiful decorations around your profile',
+        badge: 'ROYAL',
+        gradient: const [
+          Color(0xFF092A30),
+          Color(0xFF070B0D),
+        ],
+        onTap: () => _openChild('Ornaments'),
+      ),
+
+      const SizedBox(height: 18),
+
+      // ================= SAVE =================
+      SizedBox(
+        height: 55,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: black,
+            foregroundColor: gold,
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: gold.withOpacity(.65),
+              ),
+            ),
+          ),
+          onPressed: loading ? null : _saveCustomization,
+          child: loading
+              ? const CircularProgressIndicator(color: gold)
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline),
+                    SizedBox(width: 9),
+                    Text(
+                      'APPLY & SAVE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .8,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _customCollectionCard({
+  required IconData icon,
+  required String title,
+  required String subtitle,
+  required String badge,
+  required List<Color> gradient,
+  required VoidCallback onTap,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 14),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(23),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: gradient,
+      ),
+      border: Border.all(
+        color: Colors.white.withOpacity(.10),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(.18),
+          blurRadius: 12,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(23),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(17),
+          child: Row(
+            children: [
+              Container(
+                width: 57,
+                height: 57,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(17),
+                  color: Colors.white.withOpacity(.08),
+                  border: Border.all(
+                    color: gold.withOpacity(.35),
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: gold,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: .8,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: gold.withOpacity(.13),
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            badge,
+                            style: const TextStyle(
+                              color: gold,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white38,
+                size: 16,
               ),
             ],
           ),
         ),
-        _heading('PROFILE FRAMES'),
-        _option(
-          title: 'Choose Frame',
-          value: selectedFrame,
-          options: const [
-            'Classic Gold',
-            'Royal',
-            'Diamond',
-            'Angel Wings',
-            'Dragon',
-            'VIP',
-            'Event',
-          ],
-          onChanged: (v) => setState(() => selectedFrame = v),
-        ),
-        _heading('PROFILE THEMES'),
-        _option(
-          title: 'Choose Theme',
-          value: selectedTheme,
-          options: const [
-            'Black Gold',
-            'Pink Royal',
-            'Purple Galaxy',
-            'Blue Ocean',
-            'Red Flame',
-            'Luxury Dark',
-          ],
-          onChanged: (v) => setState(() => selectedTheme = v),
-        ),
-        _heading('PROFILE ORNAMENTS'),
-        _option(
-          title: 'Choose Ornament',
-          value: selectedOrnament,
-          options: const [
-            'None',
-            'Crown',
-            'Wings',
-            'Dragon',
-            'Flowers',
-            'Stars',
-          ],
-          onChanged: (v) => setState(() => selectedOrnament = v),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: black,
-              foregroundColor: gold,
-            ),
-            onPressed: loading ? null : _saveCustomization,
-            child: loading
-                ? const CircularProgressIndicator(color: gold)
-                : const Text('APPLY & SAVE'),
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ),
+  );
+}
 
   Widget _friendsCentre() {
     return ListView(
