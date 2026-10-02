@@ -28,10 +28,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/prime_frames/
 
 dependency_overrides:
   google_sign_in_android: 7.2.7
