@@ -3359,6 +3359,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+String profileFrame = 'Imperial Crown';
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
@@ -3569,6 +3570,17 @@ ScaffoldMessenger.of(context).showSnackBar(
               )
             : null,
       ),
+
+
+        if (profileFrame == 'Imperial Crown')
+  IgnorePointer(
+    child: Image.asset(
+      'assets/prime_frames/imperial_crown.png',
+      width: 112,
+      height: 112,
+      fit: BoxFit.contain,
+    ),
+  ),
 
 
       // CROWN
@@ -3885,6 +3897,7 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       final data = doc.data() ?? {};
+    profileFrame = (data['profileFrame'] ?? 'Imperial Crown').toString();
       if (!mounted) return;
       usernameController.text =
           (data['displayName'] ?? user.displayName ?? '').toString();
