@@ -3556,20 +3556,9 @@ if (profileFrame == 'Imperial Crown')
           color: gold,
         ),
 
-      // CAMERA
-      if (!uploadingPhoto)
-        const Positioned(
-          bottom: 0,
-          right: 0,
-          child: Icon(
-            Icons.camera_alt,
-            color: gold,
-            size: 20,
-          ),
-        ),
-    ],
-  ),
-),
+
+
+        
                 ),
 
                 const SizedBox(height: 12),
