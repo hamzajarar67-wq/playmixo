@@ -3535,35 +3535,34 @@ ScaffoldMessenger.of(context).showSnackBar(
             : null,
       ),
 
+        
 
-        // PRIME FRAME
-if (profileFrame == 'Imperial Crown')
-  IgnorePointer(
-    child: Image.asset(
-      'assets/prime_frames/imperial_crown.png',
-      width: 150,
-      height: 150,
-      fit: BoxFit.contain,
-    ),
-  ),
+              // PRIME FRAME
+      if (profileFrame == 'Imperial Crown')
+        IgnorePointer(
+          child: Image.asset(
+            'assets/prime_frames/imperial_crown.png',
+            width: 150,
+            height: 150,
+            fit: BoxFit.contain,
+          ),
+        ),
 
 
       
 
-      // UPLOAD LOADING
       if (uploadingPhoto)
         const CircularProgressIndicator(
           color: gold,
         ),
+    ],
+  ),
+),
+),
 
+const SizedBox(height: 12),
 
-
-        
-                ),
-
-                const SizedBox(height: 12),
-
-                Text(
+Text(
                   user?.displayName?.isNotEmpty == true
                       ? user!.displayName!
                       : 'Playmixo User',
