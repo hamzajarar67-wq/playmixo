@@ -4599,12 +4599,6 @@ Widget _customCollectionCard({
     case 'Prime':
       return _primeCollection();
 
-    case 'Themes':
-      return _themeCollection();
-
-    case 'Ornaments':
-      return _ornamentCollection();
-
     case 'Friends Centre':
       return _friendsCentre();
       
