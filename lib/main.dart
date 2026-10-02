@@ -3897,7 +3897,6 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       final data = doc.data() ?? {};
-    profileFrame = (data['profileFrame'] ?? 'Imperial Crown').toString();
       if (!mounted) return;
       usernameController.text =
           (data['displayName'] ?? user.displayName ?? '').toString();
