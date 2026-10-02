@@ -5162,7 +5162,16 @@ Widget _primeCollection() {
   );
 }
 
-Widget _primeVisual(String name) {
+
+    Widget _primeVisual(String name) {
+  if (name == 'Imperial Crown') {
+    return Image.asset(
+      'assets/prime_frames/imperial_crown.png',
+      width: 112,
+      height: 112,
+      fit: BoxFit.contain,
+    );
+  }
   Color outer1 = gold;
   Color outer2 = const Color(0xFF76500B);
   IconData centerIcon = Icons.person;
