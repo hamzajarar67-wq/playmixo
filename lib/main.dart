@@ -4598,6 +4598,9 @@ Widget _customCollectionCard({
 
     case 'Prime':
       return _primeCollection();
+          
+    case 'Themes':
+      return _themeCollection();
 
     case 'Friends Centre':
       return _friendsCentre();
@@ -4926,6 +4929,254 @@ Widget _primeCollection() {
               ? const CircularProgressIndicator(color: gold)
               : const Text(
                   'APPLY PRIME',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+        ),
+      ),
+    ],
+  );
+}
+
+
+Widget _themeCollection() {
+  final themeItems = [
+    ('Black Gold', Icons.dark_mode, true),
+    ('Royal Theme', Icons.workspace_premium, false),
+    ('Diamond Theme', Icons.diamond, false),
+    ('Purple Galaxy', Icons.auto_awesome, false),
+    ('Blue Ocean', Icons.water_drop, false),
+    ('Crimson Night', Icons.nights_stay, false),
+  ];
+
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+    children: [
+      _heading('THEME COLLECTION'),
+
+      Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF281343),
+              Color(0xFF090711),
+            ],
+          ),
+          border: Border.all(
+            color: gold.withOpacity(.55),
+          ),
+        ),
+        child: const Row(
+          children: [
+            Icon(
+              Icons.palette_outlined,
+              color: gold,
+              size: 34,
+            ),
+            SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'THEMES',
+                    style: TextStyle(
+                      color: gold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Transform the look behind your profile.',
+                    style: TextStyle(
+                      color: Colors.white60,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      const SizedBox(height: 20),
+
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: themeItems.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: .82,
+        ),
+        itemBuilder: (context, index) {
+          final item = themeItems[index];
+          final name = item.$1;
+          final icon = item.$2;
+          final isFree = item.$3;
+          final selected = selectedTheme == name;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedTheme = name;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: selected
+                      ? [
+                          const Color(0xFF3D205E),
+                          const Color(0xFF100B17),
+                        ]
+                      : [
+                          const Color(0xFF171717),
+                          const Color(0xFF0B0B0B),
+                        ],
+                ),
+                border: Border.all(
+                  color: selected
+                      ? gold
+                      : Colors.white.withOpacity(.09),
+                  width: selected ? 1.6 : 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isFree
+                            ? Colors.green.withOpacity(.16)
+                            : gold.withOpacity(.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isFree ? 'FREE' : 'PAID',
+                        style: TextStyle(
+                          color: isFree
+                              ? Colors.greenAccent
+                              : gold,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF6C3BAA),
+                          Color(0xFF171020),
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: gold,
+                      size: 38,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    isFree ? 'Available for you' : 'Premium Theme',
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 9,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: double.infinity,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11),
+                      color: selected
+                          ? gold
+                          : Colors.white.withOpacity(.07),
+                    ),
+                    child: Center(
+                      child: Text(
+                        selected ? 'SELECTED' : 'CHOOSE',
+                        style: TextStyle(
+                          color: selected ? black : Colors.white70,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+
+      const SizedBox(height: 18),
+
+      SizedBox(
+        height: 54,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: black,
+            foregroundColor: gold,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(17),
+              side: BorderSide(
+                color: gold.withOpacity(.65),
+              ),
+            ),
+          ),
+          onPressed: loading ? null : _saveCustomization,
+          child: loading
+              ? const CircularProgressIndicator(color: gold)
+              : const Text(
+                  'APPLY THEME',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     letterSpacing: .8,
