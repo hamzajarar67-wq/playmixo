@@ -4731,444 +4731,276 @@ Widget _customCollectionCard({
     );
   }
 
-
 Widget _primeCollection() {
   final primeItems = [
-  ('Imperial Crown', true),
-  ('Royal Majesty', false),
-  ('Golden Monarch', false),
-  ('King’s Legacy', false),
-  ('Queen’s Grace', false),
-  ('Royal Dynasty', false),
-  ('Crown Emperor', false),
-  ('Velvet Royal', false),
-  ('Royal Sovereign', false),
-  ('Imperial Glory', false),
-  ('Golden Throne', false),
-  ('Royal Prestige', false),
-  ('Crown of Valor', false),
-  ('Majestic Prince', false),
-  ('Majestic Princess', false),
-  ('Royal Regent', false),
-  ('Emperor’s Aura', false),
-  ('Royal Empress', false),
-  ('Crown Royale', false),
-  ('Eternal Monarch', false),
-  ('Diamond Majesty', false),
-  ('Crystal Crown', false),
-  ('Diamond Eclipse', false),
-  ('Crystal Palace', false),
-  ('Diamond Frost', false),
-  ('Sapphire Crown', false),
-  ('Emerald Majesty', false),
-  ('Ruby Royale', false),
-  ('Crystal Aura', false),
-  ('Diamond Radiance', false),
-  ('Pearl Dynasty', false),
-  ('Crystal Empress', false),
-  ('Diamond Mirage', false),
-  ('Gemstone Glory', false),
-  ('Frozen Diamond', false),
-  ('Dragon Emperor', false),
-  ('Crimson Dragon', false),
-  ('Inferno Dragon', false),
-  ('Golden Dragon', false),
-  ('Shadow Dragon', false),
-  ('Dragon Flame', false),
-  ('Obsidian Dragon', false),
-  ('Ancient Dragon', false),
-  ('Dragon Sovereign', false),
-  ('Hellfire Crown', false),
-  ('Phoenix Inferno', false),
-  ('Crimson Inferno', false),
-  ('Eternal Flame', false),
-  ('Darkfire King', false),
-  ('Burning Dynasty', false),
-  ('Angel Serenity', false),
-  ('Divine Wings', false),
-  ('Celestial Angel', false),
-  ('Golden Angel', false),
-  ('Heavenly Grace', false),
-  ('Angelic Crown', false),
-  ('Divine Majesty', false),
-  ('Sacred Wings', false),
-  ('Seraphic Glory', false),
-  ('Eternal Angel', false),
-  ('Galaxy Emperor', false),
-  ('Cosmic Crown', false),
-  ('Nebula Majesty', false),
-  ('Stellar Royal', false),
-  ('Universe Aura', false),
-  ('Galactic Diamond', false),
-  ('Cosmic Eclipse', false),
-  ('Moonlit Galaxy', false),
-  ('Astral Crown', false),
-  ('Infinity Star', false),
-  ('Rose Majesty', false),
-  ('Golden Blossom', false),
-  ('Pearl Garden', false),
-  ('Royal Orchid', false),
-  ('Velvet Rose', false),
-  ('Crystal Blossom', false),
-  ('Moonflower Grace', false),
-  ('Golden Petals', false),
-  ('Sakura Royale', false),
-  ('Diamond Rose', false),
-  ('Pearl Serenity', false),
-  ('Luxury Bloom', false),
-  ('Floral Empress', false),
-  ('Enchanted Rose', false),
-  ('Velvet Pearl', false),
-  ('Shadow King', false),
-  ('Black Emperor', false),
-  ('Dark Sovereign', false),
-  ('Midnight Warrior', false),
-  ('Obsidian Crown', false),
-  ('Phantom Lord', false),
-  ('Black Dynasty', false),
-  ('Nightfall King', false),
-  ('Shadow Monarch', false),
-  ('Iron Majesty', false),
-  ('Dark Knight', false),
-  ('Black Phoenix', false),
-  ('Silent Warrior', false),
-  ('Void Emperor', false),
-  ('Ruthless Crown', false),
-  ('Golden Phoenix', false),
-  ('Golden Legend', false),
-  ('VIP Majesty', false),
-  ('Royal Fortune', false),
-  ('Millionaire Crown', false),
-  ('Golden Prestige', false),
-  ('Luxury Emperor', false),
-  ('Golden Legacy', false),
-  ('Elite Sovereign', false),
-  ('Platinum Royal', false),
-  ('Golden Dynasty', false),
-  ('Diamond VIP', false),
-  ('Imperial Gold', false),
-  ('Ultimate Crown', false),
-  ('Prestige Royale', false),
-  ('Festival Crown', false),
-  ('Star Celebration', false),
-  ('Royal Carnival', false),
-  ('Celebration King', false),
-  ('Golden Confetti', false),
-  ('Firework Royale', false),
-  ('Birthday Majesty', false),
-  ('Love Festival', false),
-  ('Dream Crown', false),
-  ('Magic Celebration', false),
-  ('Lucky Star', false),
-  ('Sweet Royal', false),
-  ('Rainbow Majesty', false),
-  ('Dreamy Galaxy', false),
-  ('Celebration Emperor', false),
-];
+    ('Imperial Crown', true),
+    ('Royal Majesty', false),
+    ('Golden Monarch', false),
+    ('King’s Legacy', false),
+    ('Queen’s Grace', false),
+    ('Royal Dynasty', false),
+    ('Crown Emperor', false),
+    ('Velvet Royal', false),
+    ('Royal Sovereign', false),
+    ('Imperial Glory', false),
+    ('Golden Throne', false),
+    ('Royal Prestige', false),
+    ('Crown of Valor', false),
+    ('Majestic Prince', false),
+    ('Majestic Princess', false),
+    ('Royal Regent', false),
+    ('Emperor’s Aura', false),
+    ('Royal Empress', false),
+    ('Crown Royale', false),
+    ('Eternal Monarch', false),
+    ('Diamond Majesty', false),
+    ('Crystal Crown', false),
+    ('Diamond Eclipse', false),
+    ('Crystal Palace', false),
+    ('Diamond Frost', false),
+    ('Sapphire Crown', false),
+    ('Emerald Majesty', false),
+    ('Ruby Royale', false),
+    ('Crystal Aura', false),
+    ('Diamond Radiance', false),
+    ('Pearl Dynasty', false),
+    ('Crystal Empress', false),
+    ('Diamond Mirage', false),
+    ('Gemstone Glory', false),
+    ('Frozen Diamond', false),
+    ('Dragon Emperor', false),
+    ('Crimson Dragon', false),
+    ('Inferno Dragon', false),
+    ('Golden Dragon', false),
+    ('Shadow Dragon', false),
+    ('Dragon Flame', false),
+    ('Obsidian Dragon', false),
+    ('Ancient Dragon', false),
+    ('Dragon Sovereign', false),
+    ('Hellfire Crown', false),
+    ('Phoenix Inferno', false),
+    ('Crimson Inferno', false),
+    ('Eternal Flame', false),
+    ('Darkfire King', false),
+    ('Burning Dynasty', false),
+    ('Angel Serenity', false),
+    ('Divine Wings', false),
+    ('Celestial Angel', false),
+    ('Golden Angel', false),
+    ('Heavenly Grace', false),
+    ('Angelic Crown', false),
+    ('Divine Majesty', false),
+    ('Sacred Wings', false),
+    ('Seraphic Glory', false),
+    ('Eternal Angel', false),
+    ('Galaxy Emperor', false),
+    ('Cosmic Crown', false),
+    ('Nebula Majesty', false),
+    ('Stellar Royal', false),
+    ('Universe Aura', false),
+    ('Galactic Diamond', false),
+    ('Cosmic Eclipse', false),
+    ('Moonlit Galaxy', false),
+    ('Astral Crown', false),
+    ('Infinity Star', false),
+    ('Rose Majesty', false),
+    ('Golden Blossom', false),
+    ('Pearl Garden', false),
+    ('Royal Orchid', false),
+    ('Velvet Rose', false),
+    ('Crystal Blossom', false),
+    ('Moonflower Grace', false),
+    ('Golden Petals', false),
+    ('Sakura Royale', false),
+    ('Diamond Rose', false),
+    ('Pearl Serenity', false),
+    ('Luxury Bloom', false),
+    ('Floral Empress', false),
+    ('Enchanted Rose', false),
+    ('Velvet Pearl', false),
+    ('Shadow King', false),
+    ('Black Emperor', false),
+    ('Dark Sovereign', false),
+    ('Midnight Warrior', false),
+    ('Obsidian Crown', false),
+    ('Phantom Lord', false),
+    ('Black Dynasty', false),
+    ('Nightfall King', false),
+    ('Shadow Monarch', false),
+    ('Iron Majesty', false),
+    ('Dark Knight', false),
+    ('Black Phoenix', false),
+    ('Silent Warrior', false),
+    ('Void Emperor', false),
+    ('Ruthless Crown', false),
+    ('Golden Phoenix', false),
+    ('Golden Legend', false),
+    ('VIP Majesty', false),
+    ('Royal Fortune', false),
+    ('Millionaire Crown', false),
+    ('Golden Prestige', false),
+    ('Luxury Emperor', false),
+    ('Golden Legacy', false),
+    ('Elite Sovereign', false),
+    ('Platinum Royal', false),
+    ('Golden Dynasty', false),
+    ('Diamond VIP', false),
+    ('Imperial Gold', false),
+    ('Ultimate Crown', false),
+    ('Prestige Royale', false),
+    ('Festival Crown', false),
+    ('Star Celebration', false),
+    ('Royal Carnival', false),
+    ('Celebration King', false),
+    ('Golden Confetti', false),
+    ('Firework Royale', false),
+    ('Birthday Majesty', false),
+    ('Love Festival', false),
+    ('Dream Crown', false),
+    ('Magic Celebration', false),
+    ('Lucky Star', false),
+    ('Sweet Royal', false),
+    ('Rainbow Majesty', false),
+    ('Dreamy Galaxy', false),
+    ('Celebration Emperor', false),
+  ];
 
-  return ListView(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
-    children: [
-      _heading('PRIME COLLECTION'),
-
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF4A350A),
-              Color(0xFF151008),
-              Color(0xFF070707),
-            ],
-          ),
-          border: Border.all(
-            color: gold.withOpacity(.60),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: gold.withOpacity(.12),
-              blurRadius: 22,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 55,
-              height: 55,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFFE8A3),
-                    Color(0xFFB77A16),
-                    Color(0xFFFFD76A),
-                  ],
+  return Container(
+    color: const Color(0xFF050505),
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(8, 10, 8, 30),
+      children: [
+        SizedBox(
+          height: 52,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0B0B0B),
+              foregroundColor: gold,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: gold.withOpacity(.65),
+                  width: 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: gold.withOpacity(.30),
-                    blurRadius: 18,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.workspace_premium,
-                color: Color(0xFF171006),
-                size: 30,
               ),
             ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'PRIME',
+            onPressed: loading ? null : _saveCustomization,
+            child: loading
+                ? const CircularProgressIndicator(color: gold)
+                : const Text(
+                    'APPLY PRIME',
                     style: TextStyle(
-                      color: gold,
-                      fontSize: 19,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.3,
+                      letterSpacing: 1,
                     ),
                   ),
-                  SizedBox(height: 5),
-                  Text(
-                    'Premium profile frames crafted for special identities.',
-                    style: TextStyle(
-                      color: Colors.white60,
-                      fontSize: 11,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
 
-      const SizedBox(height: 20),
+        const SizedBox(height: 14),
 
-      GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: primeItems.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: .78,
-        ),
-        itemBuilder: (context, index) {
-          final name = primeItems[index].$1;
-          final isFree = primeItems[index].$2;
-          final selected = selectedFrame == name;
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: primeItems.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 18,
+            childAspectRatio: .68,
+          ),
+          itemBuilder: (context, index) {
+            final name = primeItems[index].$1;
+            final isFree = primeItems[index].$2;
+            final selected = selectedFrame == name;
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedFrame = name;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 11),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: selected
-                      ? [
-                          const Color(0xFF493309),
-                          const Color(0xFF171107),
-                          const Color(0xFF090909),
-                        ]
-                      : [
-                          const Color(0xFF1A1A1A),
-                          const Color(0xFF0B0B0B),
-                        ],
-                ),
-                border: Border.all(
-                  color: selected
-                      ? gold
-                      : Colors.white.withOpacity(.10),
-                  width: selected ? 1.6 : 1,
-                ),
-                boxShadow: [
-                  if (selected)
-                    BoxShadow(
-                      color: gold.withOpacity(.22),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                ],
-              ),
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedFrame = name;
+                });
+              },
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isFree
-                              ? Colors.green.withOpacity(.14)
-                              : gold.withOpacity(.10),
-                          borderRadius: BorderRadius.circular(7),
-                          border: Border.all(
-                            color: isFree
-                                ? Colors.greenAccent.withOpacity(.30)
-                                : gold.withOpacity(.25),
-                          ),
-                        ),
-                        child: Text(
-                          isFree ? 'FREE' : 'PREMIUM',
-                          style: TextStyle(
-                            color: isFree
-                                ? Colors.greenAccent
-                                : gold,
-                            fontSize: 7,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: .5,
-                          ),
-                        ),
-                      ),
-                      if (selected)
-                        const Icon(
-                          Icons.check_circle,
-                          color: gold,
-                          size: 17,
-                        ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
                   Expanded(
-                    child: Center(
-                      child: _primeVisual(name),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _primeVisual(name),
+
+                        if (selected)
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF080808),
+                                border: Border.all(
+                                  color: gold,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: gold,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 5),
 
                   Text(
                     name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+                    style: TextStyle(
+                      color: selected ? gold : Colors.white,
+                      fontSize: 10,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: .2,
                     ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
 
                   Text(
-                    isFree
-                        ? 'Available for you'
-                        : 'Premium Prime',
-                    style: const TextStyle(
-                      color: Colors.white38,
-                      fontSize: 8,
-                    ),
-                  ),
-
-                  const SizedBox(height: 9),
-
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: double.infinity,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      gradient: selected
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFFFFE18A),
-                                Color(0xFFC58A20),
-                              ],
-                            )
-                          : null,
-                      color: selected
-                          ? null
-                          : Colors.white.withOpacity(.06),
-                      border: Border.all(
-                        color: selected
-                            ? Colors.transparent
-                            : Colors.white.withOpacity(.08),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        selected ? 'SELECTED' : 'CHOOSE',
-                        style: TextStyle(
-                          color: selected
-                              ? black
-                              : Colors.white60,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: .7,
-                        ),
-                      ),
+                    isFree ? 'FREE' : 'PREMIUM',
+                    style: TextStyle(
+                      color: isFree
+                          ? Colors.greenAccent
+                          : Colors.white38,
+                      fontSize: 7,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
               ),
-            ),
-          );
-        },
-      ),
-
-      const SizedBox(height: 20),
-
-      SizedBox(
-        height: 54,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: black,
-            foregroundColor: gold,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(17),
-              side: BorderSide(
-                color: gold.withOpacity(.65),
-              ),
-            ),
-          ),
-          onPressed: loading ? null : _saveCustomization,
-          child: loading
-              ? const CircularProgressIndicator(color: gold)
-              : const Text(
-                  'APPLY PRIME',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: .8,
-                  ),
-                ),
+            );
+          },
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
+
+
+
+    
 
 
     Widget _primeVisual(String name) {
   if (name == 'Imperial Crown') {
     return Image.asset(
       'assets/prime_frames/imperial_crown.png',
-      width: 112,
-      height: 112,
+      width: 155,
+      height: 155,
       fit: BoxFit.contain,
     );
   }
@@ -5301,8 +5133,8 @@ Widget _primeCollection() {
   }
 
   return SizedBox(
-    width: 112,
-    height: 112,
+  width: 155,
+  height: 155,
     child: Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
