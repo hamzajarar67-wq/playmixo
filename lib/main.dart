@@ -4602,6 +4602,9 @@ Widget _customCollectionCard({
     case 'Themes':
       return _themeCollection();
 
+    case 'Ornaments':
+      return _ornamentCollection();
+
     case 'Friends Centre':
       return _friendsCentre();
       
@@ -5177,6 +5180,264 @@ Widget _themeCollection() {
               ? const CircularProgressIndicator(color: gold)
               : const Text(
                   'APPLY THEME',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+        ),
+      ),
+    ],
+  );
+}
+
+
+Widget _ornamentCollection() {
+  final ornamentItems = [
+    ('None', Icons.close, true),
+    ('Royal Crown', Icons.workspace_premium, false),
+    ('Diamond', Icons.diamond, false),
+    ('Angel Wings', Icons.flight, false),
+    ('Dragon', Icons.local_fire_department, false),
+    ('Golden Flowers', Icons.local_florist, false),
+    ('Royal Stars', Icons.star_rounded, false),
+  ];
+
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+    children: [
+      _heading('ORNAMENT COLLECTION'),
+
+      Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF092A30),
+              Color(0xFF070B0D),
+            ],
+          ),
+          border: Border.all(
+            color: gold.withOpacity(.55),
+          ),
+        ),
+        child: const Row(
+          children: [
+            Icon(
+              Icons.auto_awesome,
+              color: gold,
+              size: 34,
+            ),
+            SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ORNAMENTS',
+                    style: TextStyle(
+                      color: gold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Add beautiful decorations around your profile.',
+                    style: TextStyle(
+                      color: Colors.white60,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      const SizedBox(height: 20),
+
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: ornamentItems.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: .82,
+        ),
+        itemBuilder: (context, index) {
+          final item = ornamentItems[index];
+          final name = item.$1;
+          final icon = item.$2;
+          final isFree = item.$3;
+          final selected = selectedOrnament == name;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedOrnament = name;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: selected
+                      ? [
+                          const Color(0xFF124650),
+                          const Color(0xFF091316),
+                        ]
+                      : [
+                          const Color(0xFF171717),
+                          const Color(0xFF0B0B0B),
+                        ],
+                ),
+                border: Border.all(
+                  color: selected
+                      ? gold
+                      : Colors.white.withOpacity(.09),
+                  width: selected ? 1.6 : 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isFree
+                            ? Colors.green.withOpacity(.16)
+                            : gold.withOpacity(.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isFree ? 'FREE' : 'PAID',
+                        style: TextStyle(
+                          color: isFree
+                              ? Colors.greenAccent
+                              : gold,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 94,
+                        height: 94,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: gold.withOpacity(.45),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: gold.withOpacity(.15),
+                              blurRadius: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        icon,
+                        color: gold,
+                        size: 42,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    isFree ? 'Available for you' : 'Premium Ornament',
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 9,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: double.infinity,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11),
+                      color: selected
+                          ? gold
+                          : Colors.white.withOpacity(.07),
+                    ),
+                    child: Center(
+                      child: Text(
+                        selected ? 'SELECTED' : 'CHOOSE',
+                        style: TextStyle(
+                          color: selected ? black : Colors.white70,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+
+      const SizedBox(height: 18),
+
+      SizedBox(
+        height: 54,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: black,
+            foregroundColor: gold,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(17),
+              side: BorderSide(
+                color: gold.withOpacity(.65),
+              ),
+            ),
+          ),
+          onPressed: loading ? null : _saveCustomization,
+          child: loading
+              ? const CircularProgressIndicator(color: gold)
+              : const Text(
+                  'APPLY ORNAMENT',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     letterSpacing: .8,
