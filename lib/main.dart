@@ -4589,13 +4589,24 @@ Widget _customCollectionCard({
   }
 
   Widget _featureContent() {
-    switch (widget.title) {
-      case 'Edit Profile':
-        return _editProfile();
-      case 'Customization Centre':
-        return _customization();
-      case 'Friends Centre':
-        return _friendsCentre();
+  switch (widget.title) {
+    case 'Edit Profile':
+      return _editProfile();
+
+    case 'Customization Centre':
+      return _customization();
+
+    case 'Prime':
+      return _primeCollection();
+
+    case 'Themes':
+      return _themeCollection();
+
+    case 'Ornaments':
+      return _ornamentCollection();
+
+    case 'Friends Centre':
+      return _friendsCentre();
       
       case 'Gift Showcase':
         return _giftShowcase();
@@ -4661,6 +4672,278 @@ Widget _customCollectionCard({
       ),
     );
   }
+
+Widget _primeCollection() {
+  final primeItems = [
+    ('Classic Gold', Icons.workspace_premium, true),
+    ('Royal', Icons.auto_awesome, false),
+    ('Diamond', Icons.diamond_outlined, false),
+    ('Angel Wings', Icons.flight, false),
+    ('Dragon', Icons.local_fire_department, false),
+    ('VIP', Icons.star_rounded, false),
+    ('Event', Icons.celebration, false),
+  ];
+
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+    children: [
+      _heading('PRIME COLLECTION'),
+
+      Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF3A2908),
+              Color(0xFF0A0907),
+            ],
+          ),
+          border: Border.all(
+            color: gold.withOpacity(.55),
+          ),
+        ),
+        child: const Row(
+          children: [
+            Icon(
+              Icons.workspace_premium,
+              color: gold,
+              size: 34,
+            ),
+            SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PRIME',
+                    style: TextStyle(
+                      color: gold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Give your profile a royal identity.',
+                    style: TextStyle(
+                      color: Colors.white60,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      const SizedBox(height: 20),
+
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: primeItems.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: .82,
+        ),
+        itemBuilder: (context, index) {
+          final item = primeItems[index];
+          final name = item.$1;
+          final icon = item.$2;
+          final isFree = item.$3;
+          final selected = selectedFrame == name;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedFrame = name;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: selected
+                      ? [
+                          const Color(0xFF4A350A),
+                          const Color(0xFF15110A),
+                        ]
+                      : [
+                          const Color(0xFF171717),
+                          const Color(0xFF0B0B0B),
+                        ],
+                ),
+                border: Border.all(
+                  color: selected
+                      ? gold
+                      : Colors.white.withOpacity(.09),
+                  width: selected ? 1.6 : 1,
+                ),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                          color: gold.withOpacity(.18),
+                          blurRadius: 18,
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isFree
+                            ? Colors.green.withOpacity(.16)
+                            : gold.withOpacity(.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isFree ? 'FREE' : 'PAID',
+                        style: TextStyle(
+                          color: isFree
+                              ? Colors.greenAccent
+                              : gold,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFFFE08A),
+                          Color(0xFF8D650E),
+                          Color(0xFFFFE6A0),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: gold.withOpacity(.22),
+                          blurRadius: 18,
+                        ),
+                      ],
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF11100D),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: gold,
+                        size: 38,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    isFree ? 'Available for you' : 'Premium Prime',
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 9,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: double.infinity,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11),
+                      color: selected
+                          ? gold
+                          : Colors.white.withOpacity(.07),
+                    ),
+                    child: Center(
+                      child: Text(
+                        selected ? 'SELECTED' : 'CHOOSE',
+                        style: TextStyle(
+                          color: selected ? black : Colors.white70,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+
+      const SizedBox(height: 18),
+
+      SizedBox(
+        height: 54,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: black,
+            foregroundColor: gold,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(17),
+              side: BorderSide(
+                color: gold.withOpacity(.65),
+              ),
+            ),
+          ),
+          onPressed: loading ? null : _saveCustomization,
+          child: loading
+              ? const CircularProgressIndicator(color: gold)
+              : const Text(
+                  'APPLY PRIME',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+        ),
+      ),
+    ],
+  );
+}
+
+    
 
   @override
   void dispose() {
