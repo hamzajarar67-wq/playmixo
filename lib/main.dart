@@ -3515,45 +3515,9 @@ ScaffoldMessenger.of(context).showSnackBar(
     alignment: Alignment.center,
     clipBehavior: Clip.none,
     children: [
-      // PREMIUM PRIME FRAME
-      Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const SweepGradient(
-            colors: [
-              Color(0xFFFFE7A0),
-              Color(0xFFB77A16),
-              Color(0xFFFFF0B8),
-              Color(0xFF8A5D0A),
-              Color(0xFFFFD76A),
-              Color(0xFFFFE7A0),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: gold.withOpacity(.35),
-              blurRadius: 18,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-      ),
+      
 
-      // INNER DARK RING
-      Container(
-        width: 94,
-        height: 94,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: black,
-          border: Border.all(
-            color: const Color(0xFFFFD76A),
-            width: 2,
-          ),
-        ),
-      ),
+      
 
       // PROFILE PHOTO
       CircleAvatar(
@@ -3572,26 +3536,19 @@ ScaffoldMessenger.of(context).showSnackBar(
       ),
 
 
-        if (profileFrame == 'Imperial Crown')
+        // PRIME FRAME
+if (profileFrame == 'Imperial Crown')
   IgnorePointer(
     child: Image.asset(
       'assets/prime_frames/imperial_crown.png',
-      width: 112,
-      height: 112,
+      width: 150,
+      height: 150,
       fit: BoxFit.contain,
     ),
   ),
 
 
-      // CROWN
-      const Positioned(
-        top: -13,
-        child: Icon(
-          Icons.workspace_premium,
-          color: Color(0xFFFFD76A),
-          size: 27,
-        ),
-      ),
+      
 
       // UPLOAD LOADING
       if (uploadingPhoto)
