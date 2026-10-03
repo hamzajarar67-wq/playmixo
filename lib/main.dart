@@ -4238,12 +4238,14 @@ class _ProfileMenuTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool showRedDot;
 
   const _ProfileMenuTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.showRedDot = false,
   });
 
   @override
@@ -4256,15 +4258,40 @@ class _ProfileMenuTile extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE5E5E5)),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        leading: Container(
-          width: 45,
-          height: 45,
-          decoration: BoxDecoration(
-            color: gold.withOpacity(0.18),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Icon(icon, color: black),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 5,
+        ),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: gold.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: Icon(icon, color: black),
+            ),
+            if (showRedDot)
+              Positioned(
+                right: -3,
+                top: -3,
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
         title: Text(
           title,
@@ -4276,9 +4303,15 @@ class _ProfileMenuTile extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(color: Colors.black54, fontSize: 11),
+          style: const TextStyle(
+            color: Colors.black54,
+            fontSize: 11,
+          ),
         ),
-        trailing: const Icon(Icons.chevron_right, color: darkGold),
+        trailing: const Icon(
+          Icons.chevron_right,
+          color: darkGold,
+        ),
         onTap: onTap,
       ),
     );
@@ -4581,15 +4614,45 @@ void _openChild(String title) {
     );
   }
 
-  Widget _action(String title, String subtitle, IconData icon,
-      {VoidCallback? onTap}) {
-    return _ProfileMenuTile(
-      icon: icon,
-      title: title,
-      subtitle: subtitle,
-      onTap: onTap ?? () => _openChild(title),
+  Widget _action(
+  String title,
+  String subtitle,
+  IconData icon, {
+  VoidCallback? onTap,
+}) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (title == 'Friend Requests' || title == 'Friends Centre') {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: user == null
+          ? null
+          : FirebaseFirestore.instance
+              .collection('friend_requests')
+              .where('receiverId', isEqualTo: user.uid)
+              .where('status', isEqualTo: 'pending')
+              .snapshots(),
+      builder: (context, snapshot) {
+        final hasPending =
+            snapshot.data?.docs.isNotEmpty == true;
+
+        return _ProfileMenuTile(
+          icon: icon,
+          title: title,
+          subtitle: subtitle,
+          showRedDot: hasPending,
+          onTap: onTap ?? () => _openChild(title),
+        );
+      },
     );
   }
+
+  return _ProfileMenuTile(
+    icon: icon,
+    title: title,
+    subtitle: subtitle,
+    onTap: onTap ?? () => _openChild(title),
+  );
+}
 
   Widget _editProfile() {
     return ListView(
