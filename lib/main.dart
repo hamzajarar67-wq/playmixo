@@ -2989,11 +2989,13 @@ class RoomList extends StatelessWidget {
 }
 
 
-
-
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Sirf current search screen ke liye.
+  // Send dabane ke baad button hide rahega.
+  bool _requestSentInCurrentSearch = false;
 
   Future<Map<String, dynamic>?> _searchUser(String text) async {
     final searchId = text.trim();
@@ -3054,12 +3056,18 @@ class UserSearchDelegate extends SearchDelegate<String?> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      // Button isi search ke andar hide rahega.
+      _requestSentInCurrentSearch = true;
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Friend request sent.'),
           ),
         );
+
+        // UI rebuild.
+        showSuggestions(context);
       }
     } catch (e) {
       if (context.mounted) {
@@ -3078,7 +3086,14 @@ class UserSearchDelegate extends SearchDelegate<String?> {
       if (query.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.clear),
-          onPressed: () => query = '',
+          onPressed: () {
+            query = '';
+
+            // Nayi search ke liye button state reset.
+            _requestSentInCurrentSearch = false;
+
+            showSuggestions(context);
+          },
         ),
     ];
   }
@@ -3147,18 +3162,23 @@ class UserSearchDelegate extends SearchDelegate<String?> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // DP
                 CircleAvatar(
                   radius: 42,
                   backgroundImage: photoURL.isNotEmpty
                       ? NetworkImage(photoURL)
                       : null,
                   child: photoURL.isEmpty
-                      ? const Icon(Icons.person, size: 42)
+                      ? const Icon(
+                          Icons.person,
+                          size: 42,
+                        )
                       : null,
                 ),
 
                 const SizedBox(height: 12),
 
+                // NAME
                 Text(
                   name,
                   textAlign: TextAlign.center,
@@ -3171,6 +3191,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
 
                 const SizedBox(height: 5),
 
+                // 6-DIGIT USER ID
                 Text(
                   'ID: $userId',
                   style: const TextStyle(
@@ -3181,20 +3202,27 @@ class UserSearchDelegate extends SearchDelegate<String?> {
 
                 const SizedBox(height: 16),
 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _sendRequest(uid, context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(
-                        color: Colors.black26,
+                // SEND REQUEST
+                if (!_requestSentInCurrentSearch)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _sendRequest(
+                        uid,
+                        context,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(
+                          color: Colors.black26,
+                        ),
+                      ),
+                      child: const Text(
+                        'Send Request',
                       ),
                     ),
-                    child: const Text('Send Request'),
                   ),
-                ),
               ],
             ),
           ),
@@ -3208,6 +3236,9 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     return buildSuggestions(context);
   }
 }
+
+
+        
       
         
 
