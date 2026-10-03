@@ -2990,116 +2990,8 @@ class RoomList extends StatelessWidget {
 
 
 
-
-    
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  Future<List<Map<String, dynamic>>> _searchUsers(String text) async {
-    final publicId = text.trim();
-
-    if (!RegExp(r'^\d{6}$').hasMatch(publicId)) {
-      return [];
-    }
-
-    // 6-digit Public ID -> Firebase UID
-    final publicIdDoc = await _firestore
-        .collection('public_user_ids')
-        .doc(publicId)
-        .get();
-
-    if (!publicIdDoc.exists) {
-      return [];
-    }
-
-    final publicData = publicIdDoc.data() ?? <String, dynamic>{};
-    final uid = publicData['uid']?.toString() ?? '';
-
-    if (uid.isEmpty) {
-      return [];
-    }
-
-    // Public profile first
-    final profileDoc = await _firestore
-        .collection('public_profiles')
-        .doc(publicId)
-        .get();
-
-    Map<String, dynamic> profileData = {};
-
-    if (profileDoc.exists) {
-      profileData = profileDoc.data() ?? {};
-    } else {
-      // Fallback to users/{uid}
-      // This will only work if Firestore Rules allow public profile reads.
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .get();
-
-      if (userDoc.exists) {
-        profileData = userDoc.data() ?? {};
-      }
-    }
-
-    return [
-      {
-        ...profileData,
-        'uid': uid,
-        'userId': publicId,
-      },
-    ];
-  }
-
-  Future<void> _sendRequest(
-    String targetUid,
-    BuildContext context,
-  ) async {
-    final currentUser = _auth.currentUser;
-
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login first.')),
-      );
-      return;
-    }
-
-    if (currentUser.uid == targetUid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You cannot send a request to yourself.'),
-        ),
-      );
-      return;
-    }
-
-    try {
-      final requestId = '${currentUser.uid}_$targetUid';
-
-      await _firestore
-          .collection('friend_requests')
-          .doc(requestId)
-          .set({
-        'senderId': currentUser.uid,
-        'receiverId': targetUid,
-        'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Friend request sent.'),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not send request: $e'),
-        ),
-      );
-    }
-  }
 
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -3107,10 +2999,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
       if (query.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.clear),
-          onPressed: () {
-            query = '';
-            showSuggestions(context);
-          },
+          onPressed: () => query = '',
         ),
     ];
   }
@@ -3123,24 +3012,97 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     );
   }
 
+  Future<Map<String, dynamic>?> _searchUser(String input) async {
+    final searchId = input.trim();
+
+    if (!RegExp(r'^\d{6}$').hasMatch(searchId)) {
+      return null;
+    }
+
+    // 6-digit public ID -> Firebase UID
+    final publicIdDoc = await _firestore
+        .collection('public_user_ids')
+        .doc(searchId)
+        .get();
+
+    if (!publicIdDoc.exists) {
+      return null;
+    }
+
+    final data = publicIdDoc.data();
+    final uid = data?['uid']?.toString();
+
+    if (uid == null || uid.isEmpty) {
+      return null;
+    }
+
+    // UID -> users document
+    final userDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    if (!userDoc.exists) {
+      return null;
+    }
+
+    final user = userDoc.data() ?? {};
+
+    return {
+      'uid': uid,
+      'userId': user['userId']?.toString() ?? searchId,
+      'name': (user['displayName']?.toString().isNotEmpty ?? false)
+          ? user['displayName'].toString()
+          : (user['name']?.toString().isNotEmpty ?? false)
+              ? user['name'].toString()
+              : 'Playmixo User',
+      'photoURL': user['photoURL']?.toString() ?? '',
+    };
+  }
+
+  Future<void> _sendRequest(
+    String targetUid,
+    BuildContext context,
+  ) async {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login first')),
+      );
+      return;
+    }
+
+    if (currentUid == targetUid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You cannot send a request to yourself')),
+      );
+      return;
+    }
+
+    final requestId = '${currentUid}_$targetUid';
+
+    await _firestore
+        .collection('friend_requests')
+        .doc(requestId)
+        .set({
+      'senderId': currentUid,
+      'receiverId': targetUid,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Friend request sent')),
+      );
+    }
+  }
+
   @override
-  Widget buildSuggestions(BuildContext context) {
-    final searchText = query.trim();
-
-    if (searchText.isEmpty) {
-      return const Center(
-        child: Text('Search by 6-digit User ID'),
-      );
-    }
-
-    if (!RegExp(r'^\d{6}$').hasMatch(searchText)) {
-      return const Center(
-        child: Text('Enter a 6-digit User ID.'),
-      );
-    }
-
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _searchUsers(searchText),
+  Widget buildResults(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _searchUser(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -3153,81 +3115,109 @@ class UserSearchDelegate extends SearchDelegate<String?> {
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                'Search failed:\n${snapshot.error}',
+                'Search failed: ${snapshot.error}',
                 textAlign: TextAlign.center,
               ),
             ),
           );
         }
 
-        final users = snapshot.data ?? [];
+        final user = snapshot.data;
 
-        if (users.isEmpty) {
+        if (user == null) {
           return const Center(
-            child: Text('No user found.'),
+            child: Text(
+              'User not found',
+              style: TextStyle(fontSize: 16),
+            ),
           );
         }
 
-        final data = users.first;
+        final name = user['name']?.toString() ?? 'Playmixo User';
+        final userId = user['userId']?.toString() ?? query.trim();
+        final photoURL = user['photoURL']?.toString() ?? '';
+        final uid = user['uid']?.toString() ?? '';
 
-        final uid = data['uid']?.toString() ?? '';
+        return Center(
+          child: Card(
+            margin: const EdgeInsets.all(20),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: 42,
+                    backgroundImage: photoURL.isNotEmpty
+                        ? NetworkImage(photoURL)
+                        : null,
+                    child: photoURL.isEmpty
+                        ? const Icon(Icons.person, size: 42)
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
 
-        final name =
-            (data['displayName'] ??
-                    data['name'] ??
-                    'Playmixo User')
-                .toString();
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
 
-        final userId =
-            (data['userId'] ?? searchText).toString();
+                  const SizedBox(height: 6),
 
-        final photoUrl =
-            (data['photoURL'] ??
-                    data['photoUrl'] ??
-                    data['avatarUrl'] ??
-                    '')
-                .toString();
+                  Text(
+                    'ID: $userId',
+                    style: const TextStyle(fontSize: 15),
+                  ),
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundImage: photoUrl.isNotEmpty
-                    ? NetworkImage(photoUrl)
-                    : null,
-                child: photoUrl.isEmpty
-                    ? const Icon(Icons.person)
-                    : null,
-              ),
-              title: Text(name),
-              subtitle: Text('ID: $userId'),
-              trailing: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: uid.isEmpty
-                    ? null
-                    : () => _sendRequest(
-                          uid,
-                          context,
-                        ),
-                child: const Text('Send Request'),
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: uid.isEmpty
+                          ? null
+                          : () => _sendRequest(uid, context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                      ),
+                      child: const Text('Send Request'),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         );
       },
     );
   }
 
   @override
-  Widget buildResults(BuildContext context) {
-    return buildSuggestions(context);
+  Widget buildSuggestions(BuildContext context) {
+    if (query.isEmpty) {
+      return const Center(
+        child: Text('Enter a 6-digit User ID'),
+      );
+    }
+
+    if (!RegExp(r'^\d{6}$').hasMatch(query.trim())) {
+      return const Center(
+        child: Text('Enter exactly 6 digits'),
+      );
+    }
+
+    return buildResults(context);
   }
 }
+    
+
+      
+        
 
 
 
