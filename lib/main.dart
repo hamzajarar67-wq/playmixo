@@ -2990,8 +2990,87 @@ class RoomList extends StatelessWidget {
 
 
 
+
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<Map<String, dynamic>?> _searchUser(String text) async {
+    final searchId = text.trim();
+
+    if (!RegExp(r'^\d{6}$').hasMatch(searchId)) {
+      return null;
+    }
+
+    final doc = await _firestore
+        .collection('public_user_ids')
+        .doc(searchId)
+        .get();
+
+    if (!doc.exists) return null;
+
+    final data = doc.data() ?? {};
+    final uid = data['uid']?.toString() ?? '';
+
+    if (uid.isEmpty) return null;
+
+    return {
+      'uid': uid,
+      'userId': data['userId']?.toString() ?? searchId,
+      'displayName': data['displayName']?.toString() ??
+          data['name']?.toString() ??
+          'Playmixo User',
+      'photoURL': data['photoURL']?.toString() ?? '',
+    };
+  }
+
+  Future<void> _sendRequest(
+    String targetUid,
+    BuildContext context,
+  ) async {
+    final currentUser = _auth.currentUser;
+
+    if (currentUser == null) return;
+
+    if (currentUser.uid == targetUid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You cannot send a request to yourself.'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final requestId = '${currentUser.uid}_$targetUid';
+
+      await _firestore
+          .collection('friend_requests')
+          .doc(requestId)
+          .set({
+        'senderId': currentUser.uid,
+        'receiverId': targetUid,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Friend request sent.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not send request: $e'),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -3012,95 +3091,20 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     );
   }
 
-  Future<Map<String, dynamic>?> _searchUser(String input) async {
-    final searchId = input.trim();
-
-    if (!RegExp(r'^\d{6}$').hasMatch(searchId)) {
-      return null;
-    }
-
-    // 6-digit public ID -> Firebase UID
-    final publicIdDoc = await _firestore
-        .collection('public_user_ids')
-        .doc(searchId)
-        .get();
-
-    if (!publicIdDoc.exists) {
-      return null;
-    }
-
-    final data = publicIdDoc.data();
-    final uid = data?['uid']?.toString();
-
-    if (uid == null || uid.isEmpty) {
-      return null;
-    }
-
-    // UID -> users document
-    final userDoc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .get();
-
-    if (!userDoc.exists) {
-      return null;
-    }
-
-    final user = userDoc.data() ?? {};
-
-    return {
-      'uid': uid,
-      'userId': user['userId']?.toString() ?? searchId,
-      'name': (user['displayName']?.toString().isNotEmpty ?? false)
-          ? user['displayName'].toString()
-          : (user['name']?.toString().isNotEmpty ?? false)
-              ? user['name'].toString()
-              : 'Playmixo User',
-      'photoURL': user['photoURL']?.toString() ?? '',
-    };
-  }
-
-  Future<void> _sendRequest(
-    String targetUid,
-    BuildContext context,
-  ) async {
-    final currentUid = FirebaseAuth.instance.currentUser?.uid;
-
-    if (currentUid == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please login first')),
-      );
-      return;
-    }
-
-    if (currentUid == targetUid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You cannot send a request to yourself')),
-      );
-      return;
-    }
-
-    final requestId = '${currentUid}_$targetUid';
-
-    await _firestore
-        .collection('friend_requests')
-        .doc(requestId)
-        .set({
-      'senderId': currentUid,
-      'receiverId': targetUid,
-      'status': 'pending',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Friend request sent')),
-      );
-    }
-  }
-
   @override
-  Widget buildResults(BuildContext context) {
+  Widget buildSuggestions(BuildContext context) {
+    if (query.trim().isEmpty) {
+      return const Center(
+        child: Text('Enter 6-digit User ID'),
+      );
+    }
+
+    if (!RegExp(r'^\d{6}$').hasMatch(query.trim())) {
+      return const Center(
+        child: Text('Enter exactly 6 digits'),
+      );
+    }
+
     return FutureBuilder<Map<String, dynamic>?>(
       future: _searchUser(query),
       builder: (context, snapshot) {
@@ -3112,13 +3116,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
 
         if (snapshot.hasError) {
           return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'Search failed: ${snapshot.error}',
-                textAlign: TextAlign.center,
-              ),
-            ),
+            child: Text('Search failed: ${snapshot.error}'),
           );
         }
 
@@ -3126,70 +3124,78 @@ class UserSearchDelegate extends SearchDelegate<String?> {
 
         if (user == null) {
           return const Center(
-            child: Text(
-              'User not found',
-              style: TextStyle(fontSize: 16),
-            ),
+            child: Text('User not found.'),
           );
         }
 
-        final name = user['name']?.toString() ?? 'Playmixo User';
-        final userId = user['userId']?.toString() ?? query.trim();
-        final photoURL = user['photoURL']?.toString() ?? '';
-        final uid = user['uid']?.toString() ?? '';
+        final uid = user['uid'].toString();
+        final name = user['displayName'].toString();
+        final userId = user['userId'].toString();
+        final photoURL = user['photoURL'].toString();
 
         return Center(
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.all(20),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: 42,
-                    backgroundImage: photoURL.isNotEmpty
-                        ? NetworkImage(photoURL)
-                        : null,
-                    child: photoURL.isEmpty
-                        ? const Icon(Icons.person, size: 42)
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    'ID: $userId',
-                    style: const TextStyle(fontSize: 15),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: uid.isEmpty
-                          ? null
-                          : () => _sendRequest(uid, context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                      ),
-                      child: const Text('Send Request'),
-                    ),
-                  ),
-                ],
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: const Color(0xFFE0E0E0),
               ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 42,
+                  backgroundImage: photoURL.isNotEmpty
+                      ? NetworkImage(photoURL)
+                      : null,
+                  child: photoURL.isEmpty
+                      ? const Icon(Icons.person, size: 42)
+                      : null,
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  'ID: $userId',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 14,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _sendRequest(uid, context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      side: const BorderSide(
+                        color: Colors.black26,
+                      ),
+                    ),
+                    child: const Text('Send Request'),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -3198,24 +3204,10 @@ class UserSearchDelegate extends SearchDelegate<String?> {
   }
 
   @override
-  Widget buildSuggestions(BuildContext context) {
-    if (query.isEmpty) {
-      return const Center(
-        child: Text('Enter a 6-digit User ID'),
-      );
-    }
-
-    if (!RegExp(r'^\d{6}$').hasMatch(query.trim())) {
-      return const Center(
-        child: Text('Enter exactly 6 digits'),
-      );
-    }
-
-    return buildResults(context);
+  Widget buildResults(BuildContext context) {
+    return buildSuggestions(context);
   }
 }
-    
-
       
         
 
@@ -6611,12 +6603,30 @@ Future<String> _getOrCreatePublicUserId() async {
   final firestore = FirebaseFirestore.instance;
   final userRef = firestore.collection('users').doc(user.uid);
 
-  // Check if this account already has a public ID.
+  // Get current user's profile data.
   final userSnapshot = await userRef.get();
-  final userData = userSnapshot.data();
+  final userData = userSnapshot.data() ?? {};
 
-  final existingId = userData?['userId']?.toString() ?? '';
+  final existingId = userData['userId']?.toString() ?? '';
 
+  final displayName =
+      (userData['displayName']?.toString().isNotEmpty ?? false)
+          ? userData['displayName'].toString()
+          : (userData['name']?.toString().isNotEmpty ?? false)
+              ? userData['name'].toString()
+              : (user.displayName?.isNotEmpty ?? false)
+                  ? user.displayName!
+                  : 'Playmixo User';
+
+  final name = userData['name']?.toString() ?? '';
+
+  final photoURL =
+      (userData['photoURL']?.toString().isNotEmpty ?? false)
+          ? userData['photoURL'].toString()
+          : (user.photoURL ?? '');
+
+  // If this account already has a 6-digit ID,
+  // keep that same ID.
   if (RegExp(r'^\d{6}$').hasMatch(existingId)) {
     return existingId;
   }
@@ -6625,22 +6635,25 @@ Future<String> _getOrCreatePublicUserId() async {
   final firstIdRef =
       firestore.collection('public_user_ids').doc('123456');
 
-  final firstIdResult = await firestore.runTransaction<String>(
-    (transaction) async {
-      final reservation = await transaction.get(firstIdRef);
+  final firstIdResult =
+      await firestore.runTransaction<String>((transaction) async {
+    final reservation = await transaction.get(firstIdRef);
 
-      if (!reservation.exists) {
-        transaction.set(firstIdRef, {
-          'uid': user.uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+    if (!reservation.exists) {
+      transaction.set(firstIdRef, {
+        'uid': user.uid,
+        'userId': '123456',
+        'displayName': displayName,
+        'name': name,
+        'photoURL': photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-        return '123456';
-      }
+      return '123456';
+    }
 
-      return '';
-    },
-  );
+    return '';
+  });
 
   if (firstIdResult == '123456') {
     await userRef.set({
@@ -6651,7 +6664,7 @@ Future<String> _getOrCreatePublicUserId() async {
     return '123456';
   }
 
-  // After 123456 is taken, generate a random unique 6-digit ID.
+  // Generate another unique 6-digit ID.
   final random = Random();
 
   for (int attempt = 0; attempt < 30; attempt++) {
@@ -6665,22 +6678,25 @@ Future<String> _getOrCreatePublicUserId() async {
     final idRef =
         firestore.collection('public_user_ids').doc(candidate);
 
-    final result = await firestore.runTransaction<String>(
-      (transaction) async {
-        final reservation = await transaction.get(idRef);
+    final result =
+        await firestore.runTransaction<String>((transaction) async {
+      final reservation = await transaction.get(idRef);
 
-        if (reservation.exists) {
-          return '';
-        }
+      if (reservation.exists) {
+        return '';
+      }
 
-        transaction.set(idRef, {
-          'uid': user.uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+      transaction.set(idRef, {
+        'uid': user.uid,
+        'userId': candidate,
+        'displayName': displayName,
+        'name': name,
+        'photoURL': photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-        return candidate;
-      },
-    );
+      return candidate;
+    });
 
     if (result.isNotEmpty) {
       await userRef.set({
