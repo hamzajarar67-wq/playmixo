@@ -4855,9 +4855,7 @@ Widget _friendRequests() {
   final user = _auth.currentUser;
 
   if (user == null) {
-    return const Center(
-      child: Text('Please sign in first.'),
-    );
+    return const Center(child: Text('Please sign in first.'));
   }
 
   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -4869,17 +4867,12 @@ Widget _friendRequests() {
         .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       }
 
       if (snapshot.hasError) {
         return const Center(
-          child: Text(
-            'Could not load friend requests.',
-            style: TextStyle(color: Colors.red),
-          ),
+          child: Text('Could not load friend requests.'),
         );
       }
 
@@ -4887,13 +4880,7 @@ Widget _friendRequests() {
 
       if (requests.isEmpty) {
         return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'No pending friend requests.',
-              textAlign: TextAlign.center,
-            ),
-          ),
+          child: Text('No pending friend requests.'),
         );
       }
 
@@ -4902,44 +4889,73 @@ Widget _friendRequests() {
         itemCount: requests.length,
         itemBuilder: (context, index) {
           final request = requests[index];
-          final data = request.data();
+          final senderId = (request.data()['senderId'] ?? '').toString();
 
-          final senderId = (data['senderId'] ?? '').toString();
+          return FutureBuilder<
+              QuerySnapshot<Map<String, dynamic>>>(
+            future: _firestore
+                .collection('public_user_ids')
+                .where('uid', isEqualTo: senderId)
+                .limit(1)
+                .get(),
+            builder: (context, profileSnapshot) {
+              final profile =
+                  profileSnapshot.data?.docs.isNotEmpty == true
+                      ? profileSnapshot.data!.docs.first.data()
+                      : <String, dynamic>{};
 
-          return Card(
-            child: ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.person),
-              ),
-              title: Text(senderId),
-              subtitle: const Text('Wants to be your friend'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-                      _rejectFriendRequest(request.id);
-                    },
+              final name = (profile['displayName'] ??
+                      profile['name'] ??
+                      'Playmixo User')
+                  .toString();
+
+              final userId = (profile['userId'] ?? '').toString();
+              final photoURL = (profile['photoURL'] ?? '').toString();
+
+              return Card(
+                color: const Color(0xFF171717),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage:
+                        photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
+                    child: photoURL.isEmpty
+                        ? const Icon(Icons.person)
+                        : null,
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.check,
-                      color: Colors.green,
-                    ),
-                    onPressed: () {
-                      _acceptFriendRequest(
-                        request.id,
-                        senderId,
-                      );
-                    },
+                  title: Text(
+                    name,
+                    style: const TextStyle(color: Colors.white),
                   ),
-                ],
-              ),
-            ),
+                  subtitle: Text(
+                    userId.isNotEmpty ? 'ID: $userId' : 'Wants to be your friend',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () =>
+                            _rejectFriendRequest(request.id),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
+                        child: const Text('Reject'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            _acceptFriendRequest(request.id, senderId),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
+                        child: const Text('Accept'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       );
