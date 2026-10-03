@@ -2990,95 +2990,82 @@ class RoomList extends StatelessWidget {
 
 
 
+
+    
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<List<Map<String, dynamic>>> _searchUsers(String text) async {
-    final query = text.trim();
+    final publicId = text.trim();
 
-    if (query.isEmpty) return [];
-
-    final results = <Map<String, dynamic>>[];
-    final addedUids = <String>{};
-
-    // Firebase UID search
-    final uidDoc = await _firestore
-        .collection('users')
-        .doc(query)
-        .get();
-
-    if (uidDoc.exists) {
-      results.add({
-        'uid': uidDoc.id,
-        ...?uidDoc.data(),
-      });
-
-      addedUids.add(uidDoc.id);
+    if (!RegExp(r'^\d{6}$').hasMatch(publicId)) {
+      return [];
     }
 
-    // 6-digit Public User ID search
-    if (RegExp(r'^\d{6}$').hasMatch(query)) {
-      final idDoc = await _firestore
-          .collection('public_user_ids')
-          .doc(query)
+    // 6-digit Public ID -> Firebase UID
+    final publicIdDoc = await _firestore
+        .collection('public_user_ids')
+        .doc(publicId)
+        .get();
+
+    if (!publicIdDoc.exists) {
+      return [];
+    }
+
+    final publicData = publicIdDoc.data() ?? <String, dynamic>{};
+    final uid = publicData['uid']?.toString() ?? '';
+
+    if (uid.isEmpty) {
+      return [];
+    }
+
+    // Public profile first
+    final profileDoc = await _firestore
+        .collection('public_profiles')
+        .doc(publicId)
+        .get();
+
+    Map<String, dynamic> profileData = {};
+
+    if (profileDoc.exists) {
+      profileData = profileDoc.data() ?? {};
+    } else {
+      // Fallback to users/{uid}
+      // This will only work if Firestore Rules allow public profile reads.
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(uid)
           .get();
 
-      if (idDoc.exists) {
-        final uid = idDoc.data()?['uid']?.toString();
-
-        if (uid != null &&
-            uid.isNotEmpty &&
-            !addedUids.contains(uid)) {
-          final userDoc =
-              await _firestore.collection('users').doc(uid).get();
-
-          if (userDoc.exists) {
-            results.add({
-              'uid': uid,
-              ...?userDoc.data(),
-              'userId': query,
-            });
-
-            addedUids.add(uid);
-          }
-        }
+      if (userDoc.exists) {
+        profileData = userDoc.data() ?? {};
       }
     }
 
-    // Name search
-    final nameResults = await _firestore
-        .collection('users')
-        .where('displayName', isEqualTo: query)
-        .limit(10)
-        .get();
-
-    for (final doc in nameResults.docs) {
-      if (addedUids.contains(doc.id)) continue;
-
-      results.add({
-        'uid': doc.id,
-        ...doc.data(),
-      });
-
-      addedUids.add(doc.id);
-    }
-
-    return results;
+    return [
+      {
+        ...profileData,
+        'uid': uid,
+        'userId': publicId,
+      },
+    ];
   }
 
   Future<void> _sendRequest(
     String targetUid,
     BuildContext context,
   ) async {
-    final user = _auth.currentUser;
+    final currentUser = _auth.currentUser;
 
-    if (user == null) {
-      close(context, null);
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login first.')),
+      );
       return;
     }
 
-    if (user.uid == targetUid) {
+    if (currentUser.uid == targetUid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You cannot send a request to yourself.'),
@@ -3088,13 +3075,13 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     }
 
     try {
-      final requestId = '${user.uid}_$targetUid';
+      final requestId = '${currentUser.uid}_$targetUid';
 
       await _firestore
           .collection('friend_requests')
           .doc(requestId)
           .set({
-        'senderId': user.uid,
+        'senderId': currentUser.uid,
         'receiverId': targetUid,
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
@@ -3105,10 +3092,10 @@ class UserSearchDelegate extends SearchDelegate<String?> {
           content: Text('Friend request sent.'),
         ),
       );
-    } catch (_) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not send friend request.'),
+        SnackBar(
+          content: Text('Could not send request: $e'),
         ),
       );
     }
@@ -3132,25 +3119,28 @@ class UserSearchDelegate extends SearchDelegate<String?> {
   Widget? buildLeading(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
+      onPressed: () => close(context, null),
     );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    if (query.trim().isEmpty) {
+    final searchText = query.trim();
+
+    if (searchText.isEmpty) {
       return const Center(
-        child: Text(
-          'Search by Firebase UID, 6-digit User ID or name',
-          textAlign: TextAlign.center,
-        ),
+        child: Text('Search by 6-digit User ID'),
+      );
+    }
+
+    if (!RegExp(r'^\d{6}$').hasMatch(searchText)) {
+      return const Center(
+        child: Text('Enter a 6-digit User ID.'),
       );
     }
 
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _searchUsers(query),
+      future: _searchUsers(searchText),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -3159,8 +3149,14 @@ class UserSearchDelegate extends SearchDelegate<String?> {
         }
 
         if (snapshot.hasError) {
-          return const Center(
-            child: Text('Search failed.'),
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Search failed:\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            ),
           );
         }
 
@@ -3172,30 +3168,41 @@ class UserSearchDelegate extends SearchDelegate<String?> {
           );
         }
 
-        return ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final data = users[index];
+        final data = users.first;
 
-            final uid = data['uid']?.toString() ?? '';
+        final uid = data['uid']?.toString() ?? '';
 
-            final name = (data['displayName'] ??
+        final name =
+            (data['displayName'] ??
                     data['name'] ??
                     'Playmixo User')
                 .toString();
 
-            final userId =
-                (data['userId'] ?? '').toString();
+        final userId =
+            (data['userId'] ?? searchText).toString();
 
-            return ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.person),
+        final photoUrl =
+            (data['photoURL'] ??
+                    data['photoUrl'] ??
+                    data['avatarUrl'] ??
+                    '')
+                .toString();
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                backgroundImage: photoUrl.isNotEmpty
+                    ? NetworkImage(photoUrl)
+                    : null,
+                child: photoUrl.isEmpty
+                    ? const Icon(Icons.person)
+                    : null,
               ),
               title: Text(name),
-              subtitle: Text(
-                'UID: $uid'
-                '${userId.isNotEmpty ? '\nUser ID: $userId' : ''}',
-              ),
+              subtitle: Text('ID: $userId'),
               trailing: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -3203,11 +3210,14 @@ class UserSearchDelegate extends SearchDelegate<String?> {
                 ),
                 onPressed: uid.isEmpty
                     ? null
-                    : () => _sendRequest(uid, context),
+                    : () => _sendRequest(
+                          uid,
+                          context,
+                        ),
                 child: const Text('Send Request'),
               ),
-            );
-          },
+            ),
+          ],
         );
       },
     );
@@ -3218,9 +3228,6 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     return buildSuggestions(context);
   }
 }
-
-    
-
 
 
 
