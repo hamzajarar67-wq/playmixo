@@ -3025,6 +3025,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
   'photoURL': data['photoURL']?.toString() ?? '',
   'bio': data['bio']?.toString() ?? '',
 };
+  }
 
   Future<void> _sendRequest(
     String targetUid,
