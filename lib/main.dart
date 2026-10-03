@@ -4354,20 +4354,34 @@ Future<void> _acceptFriendRequest(
   try {
     final batch = _firestore.batch();
 
-    final requestRef = _firestore
-        .collection('friend_requests')
-        .doc(requestId);
-
+    // Mere Friends mein sender
     final myFriendRef = _firestore
         .collection('users')
         .doc(user.uid)
         .collection('friends')
         .doc(senderId);
 
+    // Sender ke Friends mein main
+    final senderFriendRef = _firestore
+        .collection('users')
+        .doc(senderId)
+        .collection('friends')
+        .doc(user.uid);
+
     batch.set(myFriendRef, {
       'uid': senderId,
       'createdAt': FieldValue.serverTimestamp(),
     });
+
+    batch.set(senderFriendRef, {
+      'uid': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // Request accepted
+    final requestRef = _firestore
+        .collection('friend_requests')
+        .doc(requestId);
 
     batch.update(requestRef, {
       'status': 'accepted',
@@ -5304,10 +5318,7 @@ Widget _friendRequests() {
   return _friendRequests();
 
 case 'My Friends':
-  return _emptyFeature(
-    'My Friends will be connected next.',
-    Icons.people_outline,
-  );
+  return _myFriends();
 
 case 'Friend Messages':
   return _emptyFeature(
@@ -5357,6 +5368,140 @@ case 'Blocked Users':
     );
   }
 
+
+Widget _myFriends() {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return const Center(
+      child: Text(
+        'Please sign in first.',
+        style: TextStyle(color: black),
+      ),
+    );
+  }
+
+  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('friends')
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+
+      if (snapshot.hasError) {
+        return Center(
+          child: Text(
+            'Could not load friends.',
+            style: const TextStyle(color: black),
+          ),
+        );
+      }
+
+      final friends = snapshot.data?.docs ?? [];
+
+      if (friends.isEmpty) {
+        return _emptyFeature(
+          'No friends yet.',
+          Icons.people_outline,
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: friends.length,
+        itemBuilder: (context, index) {
+          final friend = friends[index].data();
+          final friendUid = friend['uid']?.toString() ?? '';
+
+          return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            future: FirebaseFirestore.instance
+                .collection('public_user_ids')
+                .where('uid', isEqualTo: friendUid)
+                .limit(1)
+                .get(),
+            builder: (context, profileSnapshot) {
+              if (!profileSnapshot.hasData ||
+                  profileSnapshot.data!.docs.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final profile =
+                  profileSnapshot.data!.docs.first.data();
+
+              final name =
+                  (profile['displayName'] ??
+                          profile['name'] ??
+                          'Playmixo User')
+                      .toString();
+
+              final userId =
+                  (profile['userId'] ?? '').toString();
+
+              final photoURL =
+                  (profile['photoURL'] ?? '').toString();
+
+              final bio =
+                  (profile['bio'] ?? '').toString();
+
+              return Card(
+                color: const Color(0xFF171717),
+                child: ListTile(
+                  leading: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PublicProfilePage(
+                            userId: userId,
+                            name: name,
+                            photoURL: photoURL,
+                            bio: bio,
+                          ),
+                        ),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: photoURL.isNotEmpty
+                          ? NetworkImage(photoURL)
+                          : null,
+                      child: photoURL.isEmpty
+                          ? const Icon(Icons.person)
+                          : null,
+                    ),
+                  ),
+                  title: Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'ID: $userId',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+}
+
+
+
+
+    
 Widget _primeCollection() {
   final primeItems = [
     ('Imperial Crown', true),
