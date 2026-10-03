@@ -4287,19 +4287,8 @@ Future<void> _acceptFriendRequest(
         .collection('friends')
         .doc(senderId);
 
-    final senderFriendRef = _firestore
-        .collection('users')
-        .doc(senderId)
-        .collection('friends')
-        .doc(user.uid);
-
     batch.set(myFriendRef, {
       'uid': senderId,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    batch.set(senderFriendRef, {
-      'uid': user.uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
 
