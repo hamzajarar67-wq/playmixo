@@ -6659,8 +6659,20 @@ Future<String> _getOrCreatePublicUserId() async {
   // If this account already has a 6-digit ID,
   // keep that same ID.
   if (RegExp(r'^\d{6}$').hasMatch(existingId)) {
-    return existingId;
-  }
+  final publicIdRef =
+      firestore.collection('public_user_ids').doc(existingId);
+
+  await publicIdRef.set({
+    'uid': user.uid,
+    'userId': existingId,
+    'displayName': displayName,
+    'name': name,
+    'photoURL': photoURL,
+    'updatedAt': FieldValue.serverTimestamp(),
+  }, SetOptions(merge: true));
+
+  return existingId;
+}
 
   // Try 123456 first.
   final firstIdRef =
