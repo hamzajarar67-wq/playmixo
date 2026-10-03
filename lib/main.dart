@@ -10,7 +10,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:http/http.dart' as http;
 
 
 final ValueNotifier<String> playmixoLanguageCode =
@@ -2771,7 +2770,15 @@ class RoomsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.search_rounded),
+                IconButton(
+  icon: const Icon(Icons.search_rounded),
+  onPressed: () {
+    showSearch(
+      context: context,
+      delegate: UserSearchDelegate(),
+    );
+  },
+),
               ],
             ),
           ),
@@ -2980,6 +2987,215 @@ class RoomList extends StatelessWidget {
     );
   }
 }
+
+
+
+class UserSearchDelegate extends SearchDelegate<String?> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<List<Map<String, dynamic>>> _searchUsers(String text) async {
+    final query = text.trim();
+
+    if (query.isEmpty) return [];
+
+    final results = <Map<String, dynamic>>[];
+    final addedUids = <String>{};
+
+    // 6-digit public User ID search
+    if (RegExp(r'^\d{6}$').hasMatch(query)) {
+      final idDoc = await _firestore
+          .collection('public_user_ids')
+          .doc(query)
+          .get();
+
+      if (idDoc.exists) {
+        final uid = idDoc.data()?['uid']?.toString();
+
+        if (uid != null && uid.isNotEmpty) {
+          final userDoc =
+              await _firestore.collection('users').doc(uid).get();
+
+          if (userDoc.exists) {
+            results.add({
+              'uid': uid,
+              ...?userDoc.data(),
+              'userId': query,
+            });
+            addedUids.add(uid);
+          }
+        }
+      }
+    }
+
+    // Name search
+    final nameResults = await _firestore
+        .collection('users')
+        .where('displayName', isEqualTo: query)
+        .limit(10)
+        .get();
+
+    for (final doc in nameResults.docs) {
+      if (addedUids.contains(doc.id)) continue;
+
+      results.add({
+        'uid': doc.id,
+        ...doc.data(),
+      });
+
+      addedUids.add(doc.id);
+    }
+
+    return results;
+  }
+
+  Future<void> _sendRequest(String targetUid) async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      close(context, null);
+      return;
+    }
+
+    if (user.uid == targetUid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You cannot send a request to yourself.'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final requestId = '${user.uid}_$targetUid';
+
+      await _firestore
+          .collection('friend_requests')
+          .doc(requestId)
+          .set({
+        'senderId': user.uid,
+        'receiverId': targetUid,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Friend request sent.'),
+        ),
+      );
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not send friend request.'),
+        ),
+      );
+    }
+  }
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    if (query.trim().isEmpty) {
+      return const Center(
+        child: Text(
+          'Search by 6-digit User ID or name',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _searchUsers(query),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Search failed.'),
+          );
+        }
+
+        final users = snapshot.data ?? [];
+
+        if (users.isEmpty) {
+          return const Center(
+            child: Text('No user found.'),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: users.length,
+          itemBuilder: (context, index) {
+            final data = users[index];
+
+            final uid = data['uid']?.toString() ?? '';
+            final name = (data['displayName'] ??
+                    data['name'] ??
+                    'Playmixo User')
+                .toString();
+
+            final userId =
+                (data['userId'] ?? '').toString();
+
+            return ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: Text(name),
+              subtitle: userId.isNotEmpty
+                  ? Text('User ID: $userId')
+                  : null,
+              trailing: ElevatedButton(
+                onPressed: uid.isEmpty
+                    ? null
+                    : () => _sendRequest(uid),
+                child: const Text('Add Friend'),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return buildSuggestions(context)!;
+  }
+}
+
+
+
+
+
 
 /* ================= GAME ================= */
 
@@ -3833,7 +4049,103 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
     _loadProfile();
   }
 
+Future<void> _sendFriendRequest(String targetUid) async {
+  final user = _auth.currentUser;
 
+  if (user == null) {
+    _message('Please sign in first.');
+    return;
+  }
+
+  if (targetUid == user.uid) {
+    _message('You cannot send a request to yourself.');
+    return;
+  }
+
+  try {
+    final requestId = '${user.uid}_$targetUid';
+
+    await _firestore
+        .collection('friend_requests')
+        .doc(requestId)
+        .set({
+      'senderId': user.uid,
+      'receiverId': targetUid,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    _message('Friend request sent.');
+  } catch (e) {
+    _message('Could not send friend request.');
+  }
+}
+
+Future<void> _acceptFriendRequest(
+  String requestId,
+  String senderId,
+) async {
+  final user = _auth.currentUser;
+
+  if (user == null) return;
+
+  try {
+    final batch = _firestore.batch();
+
+    final requestRef = _firestore
+        .collection('friend_requests')
+        .doc(requestId);
+
+    final myFriendRef = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('friends')
+        .doc(senderId);
+
+    final senderFriendRef = _firestore
+        .collection('users')
+        .doc(senderId)
+        .collection('friends')
+        .doc(user.uid);
+
+    batch.set(myFriendRef, {
+      'uid': senderId,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    batch.set(senderFriendRef, {
+      'uid': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    batch.update(requestRef, {
+      'status': 'accepted',
+      'acceptedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
+
+    _message('Friend request accepted.');
+  } catch (e) {
+    _message('Could not accept request.');
+  }
+}
+
+Future<void> _rejectFriendRequest(String requestId) async {
+  try {
+    await _firestore
+        .collection('friend_requests')
+        .doc(requestId)
+        .update({
+      'status': 'rejected',
+      'rejectedAt': FieldValue.serverTimestamp(),
+    });
+
+    _message('Friend request rejected.');
+  } catch (e) {
+    _message('Could not reject request.');
+  }
+}
 
     
   Future<void> _loadProfile() async {
@@ -3908,80 +4220,33 @@ class _ProfileFeaturePageState extends State<ProfileFeaturePage> {
 
 Future<void> _pickProfilePhoto() async {
   final picker = ImagePicker();
-  final image = await picker.pickImage(source: ImageSource.gallery);
+  final image = await picker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 90,
+  );
 
   if (image == null) return;
 
-final croppedImage = await ImageCropper().cropImage(
-  sourcePath: image.path,
-  aspectRatio: const CropAspectRatio(
-    ratioX: 1,
-    ratioY: 1,
-  ),
-  uiSettings: [
-    AndroidUiSettings(
-      toolbarTitle: 'Crop Profile Photo',
-      lockAspectRatio: true,
+  final croppedImage = await ImageCropper().cropImage(
+    sourcePath: image.path,
+    aspectRatio: const CropAspectRatio(
+      ratioX: 1,
+      ratioY: 1,
     ),
-  ],
-);
-
-if (croppedImage == null) return;
-
-try {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse(
-        'https://api.cloudinary.com/v1_1/il3mz1rq/image/upload',
+    uiSettings: [
+      AndroidUiSettings(
+        toolbarTitle: 'Crop Profile Photo',
+        lockAspectRatio: true,
       ),
-    );
-
-    request.fields['upload_preset'] = 'playmixo_dp';
-    request.files.add(
-      await http.MultipartFile.fromPath('file', croppedImage.path),
-    );
-
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-
-    if (response.statusCode == 200) {
-  final data = jsonDecode(responseBody);
-  final photoUrl = data['secure_url'];
-
-  final user = FirebaseAuth.instance.currentUser;
-
-  if (user != null && photoUrl != null) {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .set({
-      'photoURL': photoUrl,
-    }, SetOptions(merge: true));
-
-    await user.updatePhotoURL(photoUrl);
-
-    _message('Profile photo saved successfully.');
-  }
-} else {
-  _message('Upload failed.');
-}
-  } catch (e) {
-    _message('Upload error: $e');
-  }
-}
-void _message(String message) {
-  if (!mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
+    ],
   );
-}
 
-void _openChild(String title) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ProfileFeaturePage(title: title),
-    ),
+  if (croppedImage == null) return;
+
+  if (!mounted) return;
+
+  _message(
+    'Photo selected. Profile photo storage will be connected later.',
   );
 }
 
@@ -4518,6 +4783,109 @@ Widget _customCollectionCard({
     );
   }
 
+
+Widget _friendRequests() {
+  final user = _auth.currentUser;
+
+  if (user == null) {
+    return const Center(
+      child: Text('Please sign in first.'),
+    );
+  }
+
+  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: _firestore
+        .collection('friend_requests')
+        .where('receiverId', isEqualTo: user.uid)
+        .where('status', isEqualTo: 'pending')
+        .orderBy('createdAt', descending: true)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+
+      if (snapshot.hasError) {
+        return const Center(
+          child: Text(
+            'Could not load friend requests.',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
+      }
+
+      final requests = snapshot.data?.docs ?? [];
+
+      if (requests.isEmpty) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'No pending friend requests.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: requests.length,
+        itemBuilder: (context, index) {
+          final request = requests[index];
+          final data = request.data();
+
+          final senderId = (data['senderId'] ?? '').toString();
+
+          return Card(
+            child: ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: Text(senderId),
+              subtitle: const Text('Wants to be your friend'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      _rejectFriendRequest(request.id);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.check,
+                      color: Colors.green,
+                    ),
+                    onPressed: () {
+                      _acceptFriendRequest(
+                        request.id,
+                        senderId,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+
+
+
+
+
+    
   
 
   Widget _giftShowcase() {
@@ -4633,25 +5001,25 @@ Widget _customCollectionCard({
       case 'Privacy & Safety':
         return _privacySafety();
       case 'Friend Requests':
-        return _emptyFeature(
-          'Friend requests will appear here when the request system is connected.',
-          Icons.person_add_alt_1,
-        );
-      case 'My Friends':
-        return _emptyFeature(
-          'Your accepted friends will appear here. Search and remove controls need the friends database.',
-          Icons.people_outline,
-        );
-      case 'Friend Messages':
-        return _emptyFeature(
-          'Your friend conversations will appear here after messaging is connected.',
-          Icons.chat_bubble_outline,
-        );
-      case 'Blocked Users':
-        return _emptyFeature(
-          'Blocked accounts will appear here after the block system is connected.',
-          Icons.block,
-        );
+  return _friendRequests();
+
+case 'My Friends':
+  return _emptyFeature(
+    'My Friends will be connected next.',
+    Icons.people_outline,
+  );
+
+case 'Friend Messages':
+  return _emptyFeature(
+    'Friend Messages will be connected next.',
+    Icons.chat_bubble_outline,
+  );
+
+case 'Blocked Users':
+  return _emptyFeature(
+    'Blocked Users will be connected next.',
+    Icons.block,
+  );
       case 'Profile Visibility':
         return _emptyFeature(
           'Use Settings > Privacy to change your current profile privacy setting.',
