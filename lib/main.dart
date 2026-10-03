@@ -2989,7 +2989,6 @@ class RoomList extends StatelessWidget {
 }
 
 
-
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -3049,7 +3048,10 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     return results;
   }
 
-  Future<void> _sendRequest(String targetUid) async {
+  Future<void> _sendRequest(
+    String targetUid,
+    BuildContext context,
+  ) async {
     final user = _auth.currentUser;
 
     if (user == null) {
@@ -3157,6 +3159,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
             final data = users[index];
 
             final uid = data['uid']?.toString() ?? '';
+
             final name = (data['displayName'] ??
                     data['name'] ??
                     'Playmixo User')
@@ -3176,7 +3179,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
               trailing: ElevatedButton(
                 onPressed: uid.isEmpty
                     ? null
-                    : () => _sendRequest(uid),
+                    : () => _sendRequest(uid, context),
                 child: const Text('Add Friend'),
               ),
             );
@@ -3188,9 +3191,10 @@ class UserSearchDelegate extends SearchDelegate<String?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return buildSuggestions(context)!;
+    return buildSuggestions(context);
   }
 }
+
 
 
 
