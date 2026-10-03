@@ -3017,14 +3017,14 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     if (uid.isEmpty) return null;
 
     return {
-      'uid': uid,
-      'userId': data['userId']?.toString() ?? searchId,
-      'displayName': data['displayName']?.toString() ??
-          data['name']?.toString() ??
-          'Playmixo User',
-      'photoURL': data['photoURL']?.toString() ?? '',
-    };
-  }
+  'uid': uid,
+  'userId': data['userId']?.toString() ?? searchId,
+  'displayName': data['displayName']?.toString() ??
+      data['name']?.toString() ??
+      'Playmixo User',
+  'photoURL': data['photoURL']?.toString() ?? '',
+  'bio': data['bio']?.toString() ?? '',
+};
 
   Future<void> _sendRequest(
     String targetUid,
@@ -3163,18 +3163,33 @@ class UserSearchDelegate extends SearchDelegate<String?> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // DP
-                CircleAvatar(
-                  radius: 42,
-                  backgroundImage: photoURL.isNotEmpty
-                      ? NetworkImage(photoURL)
-                      : null,
-                  child: photoURL.isEmpty
-                      ? const Icon(
-                          Icons.person,
-                          size: 42,
-                        )
-                      : null,
-                ),
+GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PublicProfilePage(
+          userId: userId,
+          name: name,
+          photoURL: photoURL,
+          bio: '',
+        ),
+      ),
+    );
+  },
+  child: CircleAvatar(
+    radius: 42,
+    backgroundImage: photoURL.isNotEmpty
+        ? NetworkImage(photoURL)
+        : null,
+    child: photoURL.isEmpty
+        ? const Icon(
+            Icons.person,
+            size: 42,
+          )
+        : null,
+  ),
+),
 
                 const SizedBox(height: 12),
 
@@ -3616,6 +3631,126 @@ class WalletBalance extends StatelessWidget {
 }
 
 /* ================= PROFILE ================= */
+class PublicProfilePage extends StatelessWidget {
+  final String userId;
+  final String name;
+  final String photoURL;
+  final String bio;
+
+  const PublicProfilePage({
+    super.key,
+    required this.userId,
+    required this.name,
+    required this.photoURL,
+    required this.bio,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      title: 'Profile',
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: black,
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: gold, width: 1.2),
+            ),
+            child: Column(
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 43,
+                      backgroundColor: gold,
+                      backgroundImage: photoURL.isNotEmpty
+                          ? NetworkImage(photoURL)
+                          : null,
+                      child: photoURL.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: black,
+                            )
+                          : null,
+                    ),
+                    IgnorePointer(
+                      child: Image.asset(
+                        'assets/prime_frames/imperial_crown.png',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  name.isNotEmpty ? name : 'Playmixo User',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  userId,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                if (bio.trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    bio,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 22),
+
+                Container(
+                  height: 1,
+                  color: Colors.white24,
+                ),
+
+                const SizedBox(height: 18),
+
+                const Row(
+                  children: [
+                    ProfileStat('Followers'),
+                    ProfileStat('Following'),
+                    ProfileStat('Gift Sent'),
+                    ProfileStat('Gift Received'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -4915,13 +5050,28 @@ Widget _friendRequests() {
               return Card(
                 color: const Color(0xFF171717),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage:
-                        photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
-                    child: photoURL.isEmpty
-                        ? const Icon(Icons.person)
-                        : null,
-                  ),
+                  leading: GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PublicProfilePage(
+          userId: userId,
+          name: name,
+          photoURL: photoURL,
+          bio: '',
+        ),
+      ),
+    );
+  },
+  child: CircleAvatar(
+    backgroundImage:
+        photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
+    child: photoURL.isEmpty
+        ? const Icon(Icons.person)
+        : null,
+  ),
+),
                   title: Text(
                     name,
                     style: const TextStyle(color: Colors.white),
@@ -6639,7 +6789,6 @@ class AccountPage extends StatelessWidget {
 }
 
 
-
 Future<String> _getOrCreatePublicUserId() async {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -6650,7 +6799,6 @@ Future<String> _getOrCreatePublicUserId() async {
   final firestore = FirebaseFirestore.instance;
   final userRef = firestore.collection('users').doc(user.uid);
 
-  // Get current user's profile data.
   final userSnapshot = await userRef.get();
   final userData = userSnapshot.data() ?? {};
 
@@ -6672,25 +6820,29 @@ Future<String> _getOrCreatePublicUserId() async {
           ? userData['photoURL'].toString()
           : (user.photoURL ?? '');
 
-  // If this account already has a 6-digit ID,
-  // keep that same ID.
+  final bio = userData['bio']?.toString() ?? '';
+
+  final profileFrame =
+      userData['profileFrame']?.toString() ?? 'Imperial Crown';
+
+  Future<void> syncPublicProfile(String id) async {
+    await firestore.collection('public_user_ids').doc(id).set({
+      'uid': user.uid,
+      'userId': id,
+      'displayName': displayName,
+      'name': name,
+      'photoURL': photoURL,
+      'bio': bio,
+      'profileFrame': profileFrame,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
   if (RegExp(r'^\d{6}$').hasMatch(existingId)) {
-  final publicIdRef =
-      firestore.collection('public_user_ids').doc(existingId);
+    await syncPublicProfile(existingId);
+    return existingId;
+  }
 
-  await publicIdRef.set({
-    'uid': user.uid,
-    'userId': existingId,
-    'displayName': displayName,
-    'name': name,
-    'photoURL': photoURL,
-    'updatedAt': FieldValue.serverTimestamp(),
-  }, SetOptions(merge: true));
-
-  return existingId;
-}
-
-  // Try 123456 first.
   final firstIdRef =
       firestore.collection('public_user_ids').doc('123456');
 
@@ -6705,6 +6857,8 @@ Future<String> _getOrCreatePublicUserId() async {
         'displayName': displayName,
         'name': name,
         'photoURL': photoURL,
+        'bio': bio,
+        'profileFrame': profileFrame,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -6723,16 +6877,13 @@ Future<String> _getOrCreatePublicUserId() async {
     return '123456';
   }
 
-  // Generate another unique 6-digit ID.
   final random = Random();
 
   for (int attempt = 0; attempt < 30; attempt++) {
     final number = 100000 + random.nextInt(900000);
     final candidate = number.toString();
 
-    if (candidate == '123456') {
-      continue;
-    }
+    if (candidate == '123456') continue;
 
     final idRef =
         firestore.collection('public_user_ids').doc(candidate);
@@ -6741,9 +6892,7 @@ Future<String> _getOrCreatePublicUserId() async {
         await firestore.runTransaction<String>((transaction) async {
       final reservation = await transaction.get(idRef);
 
-      if (reservation.exists) {
-        return '';
-      }
+      if (reservation.exists) return '';
 
       transaction.set(idRef, {
         'uid': user.uid,
@@ -6751,6 +6900,8 @@ Future<String> _getOrCreatePublicUserId() async {
         'displayName': displayName,
         'name': name,
         'photoURL': photoURL,
+        'bio': bio,
+        'profileFrame': profileFrame,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
