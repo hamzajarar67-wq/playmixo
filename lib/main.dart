@@ -1864,8 +1864,13 @@ class _MainScreenState extends State<MainScreen> {
     SettingsPage(),
   ];
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+
     return Scaffold(
       body: IndexedStack(
         index: currentIndex,
@@ -1887,34 +1892,106 @@ class _MainScreenState extends State<MainScreen> {
           onDestinationSelected: (index) {
             setState(() => currentIndex = index);
           },
-          destinations: const [
-            NavigationDestination(
+          destinations: [
+            const NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home, color: black),
               label: 'Home',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.meeting_room_outlined),
               selectedIcon: Icon(Icons.meeting_room, color: black),
               label: 'Room',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.style_outlined),
               selectedIcon: Icon(Icons.style, color: black),
               label: 'Game',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.account_balance_wallet_outlined),
               selectedIcon:
                   Icon(Icons.account_balance_wallet, color: black),
               label: 'Wallet',
             ),
+
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person, color: black),
+              icon: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: user == null
+                    ? null
+                    : _firestore
+                        .collection('friend_requests')
+                        .where('receiverId', isEqualTo: user.uid)
+                        .where('status', isEqualTo: 'pending')
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  final hasPending = snapshot.data?.docs.isNotEmpty == true;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.person_outline),
+                      if (hasPending)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              selectedIcon: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: user == null
+                    ? null
+                    : _firestore
+                        .collection('friend_requests')
+                        .where('receiverId', isEqualTo: user.uid)
+                        .where('status', isEqualTo: 'pending')
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  final hasPending = snapshot.data?.docs.isNotEmpty == true;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.person, color: black),
+                      if (hasPending)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
               label: 'Profile',
             ),
-            NavigationDestination(
+
+            const NavigationDestination(
               icon: Icon(Icons.settings_outlined),
               selectedIcon: Icon(Icons.settings, color: black),
               label: 'Setting',
@@ -3173,7 +3250,7 @@ GestureDetector(
           userId: userId,
           name: name,
           photoURL: photoURL,
-          bio: '',
+          bio: profile['bio']?.toString() ?? '',
         ),
       ),
     );
