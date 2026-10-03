@@ -2989,6 +2989,7 @@ class RoomList extends StatelessWidget {
 }
 
 
+
 class UserSearchDelegate extends SearchDelegate<String?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -3001,7 +3002,22 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     final results = <Map<String, dynamic>>[];
     final addedUids = <String>{};
 
-    // 6-digit public User ID search
+    // Firebase UID search
+    final uidDoc = await _firestore
+        .collection('users')
+        .doc(query)
+        .get();
+
+    if (uidDoc.exists) {
+      results.add({
+        'uid': uidDoc.id,
+        ...?uidDoc.data(),
+      });
+
+      addedUids.add(uidDoc.id);
+    }
+
+    // 6-digit Public User ID search
     if (RegExp(r'^\d{6}$').hasMatch(query)) {
       final idDoc = await _firestore
           .collection('public_user_ids')
@@ -3011,7 +3027,9 @@ class UserSearchDelegate extends SearchDelegate<String?> {
       if (idDoc.exists) {
         final uid = idDoc.data()?['uid']?.toString();
 
-        if (uid != null && uid.isNotEmpty) {
+        if (uid != null &&
+            uid.isNotEmpty &&
+            !addedUids.contains(uid)) {
           final userDoc =
               await _firestore.collection('users').doc(uid).get();
 
@@ -3021,6 +3039,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
               ...?userDoc.data(),
               'userId': query,
             });
+
             addedUids.add(uid);
           }
         }
@@ -3124,7 +3143,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
     if (query.trim().isEmpty) {
       return const Center(
         child: Text(
-          'Search by 6-digit User ID or name',
+          'Search by Firebase UID, 6-digit User ID or name',
           textAlign: TextAlign.center,
         ),
       );
@@ -3173,14 +3192,19 @@ class UserSearchDelegate extends SearchDelegate<String?> {
                 child: Icon(Icons.person),
               ),
               title: Text(name),
-              subtitle: userId.isNotEmpty
-                  ? Text('User ID: $userId')
-                  : null,
+              subtitle: Text(
+                'UID: $uid'
+                '${userId.isNotEmpty ? '\nUser ID: $userId' : ''}',
+              ),
               trailing: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                ),
                 onPressed: uid.isEmpty
                     ? null
                     : () => _sendRequest(uid, context),
-                child: const Text('Add Friend'),
+                child: const Text('Send Request'),
               ),
             );
           },
@@ -3195,6 +3219,7 @@ class UserSearchDelegate extends SearchDelegate<String?> {
   }
 }
 
+    
 
 
 
