@@ -4871,10 +4871,10 @@ Widget _friendRequests() {
       }
 
       if (snapshot.hasError) {
-        return const Center(
-          child: Text('Could not load friend requests.'),
-        );
-      }
+  return Center(
+    child: Text('Error: ${snapshot.error}'),
+  );
+}
 
       final requests = snapshot.data?.docs ?? [];
 
