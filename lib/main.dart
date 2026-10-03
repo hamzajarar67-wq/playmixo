@@ -4863,7 +4863,7 @@ Widget _friendRequests() {
         .collection('friend_requests')
         .where('receiverId', isEqualTo: user.uid)
         .where('status', isEqualTo: 'pending')
-        .orderBy('createdAt', descending: true)
+        
         .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
