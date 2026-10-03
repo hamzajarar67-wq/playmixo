@@ -3250,7 +3250,7 @@ GestureDetector(
           userId: userId,
           name: name,
           photoURL: photoURL,
-          bio: profile['bio']?.toString() ?? '',
+          bio: user['bio']?.toString() ?? '',
         ),
       ),
     );
