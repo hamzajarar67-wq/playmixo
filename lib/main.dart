@@ -5765,8 +5765,6 @@ Widget _friendChat(
     
 
 
-    
-
 Widget _myFriends() {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -5787,16 +5785,14 @@ Widget _myFriends() {
         .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       }
 
       if (snapshot.hasError) {
-        return Center(
+        return const Center(
           child: Text(
             'Could not load friends.',
-            style: const TextStyle(color: black),
+            style: TextStyle(color: black),
           ),
         );
       }
@@ -5832,38 +5828,132 @@ Widget _myFriends() {
               final profile =
                   profileSnapshot.data!.docs.first.data();
 
-              final name =
-                  (profile['displayName'] ??
-                          profile['name'] ??
-                          'Playmixo User')
-                      .toString();
+              final name = (profile['displayName'] ??
+                      profile['name'] ??
+                      'Playmixo User')
+                  .toString();
 
-              final userId =
-                  (profile['userId'] ?? '').toString();
+              final userId = (profile['userId'] ?? '').toString();
+              final photoURL = (profile['photoURL'] ?? '').toString();
+              final bio = (profile['bio'] ?? '').toString();
 
-              final photoURL =
-                  (profile['photoURL'] ?? '').toString();
+              void openProfile() {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PublicProfilePage(
+                      userId: userId,
+                      name: name,
+                      photoURL: photoURL,
+                      bio: bio,
+                    ),
+                  ),
+                );
+              }
 
-              final bio =
-                  (profile['bio'] ?? '').toString();
+              Future<void> showFriendOptions() async {
+                final choice = await showDialog<String>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(name),
+                    content: const Text('Choose an option'),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(dialogContext, 'delete'),
+                        child: const Text('Delete'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(dialogContext, 'message'),
+                        child: const Text('Message'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(dialogContext, 'profile'),
+                        child: const Text('Profile'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(dialogContext, 'cancel'),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (!context.mounted ||
+                    choice == null ||
+                    choice == 'cancel') {
+                  return;
+                }
+
+                if (choice == 'profile') {
+                  openProfile();
+                  return;
+                }
+
+                if (choice == 'message') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => Scaffold(
+                        body: _friendChat(
+                          friendUid,
+                          name,
+                          photoURL,
+                        ),
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                if (choice == 'delete') {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: const Text('Delete Friend?'),
+                      content: Text(
+                        'Are you sure you want to delete $name?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.pop(dialogContext, false),
+                          child: const Text('No'),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.pop(dialogContext, true),
+                          child: const Text('Yes'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true && context.mounted) {
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .collection('friends')
+                          .doc(friendUid)
+                          .delete();
+
+                      _message('Friend deleted.');
+                    } catch (e) {
+                      _message('Could not delete friend.');
+                    }
+                  }
+                }
+              }
 
               return Card(
                 color: const Color(0xFF171717),
                 child: ListTile(
                   leading: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PublicProfilePage(
-                            userId: userId,
-                            name: name,
-                            photoURL: photoURL,
-                            bio: bio,
-                          ),
-                        ),
-                      );
-                    },
+                    onTap: showFriendOptions,
                     child: CircleAvatar(
                       backgroundImage: photoURL.isNotEmpty
                           ? NetworkImage(photoURL)
@@ -5882,10 +5972,9 @@ Widget _myFriends() {
                   ),
                   subtitle: Text(
                     'ID: $userId',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(color: Colors.white70),
                   ),
+                  onTap: showFriendOptions,
                 ),
               );
             },
@@ -5894,7 +5983,7 @@ Widget _myFriends() {
       );
     },
   );
-}
+}    
 
 
 
