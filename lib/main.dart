@@ -5451,6 +5451,15 @@ Widget _friendMessages() {
         return const Center(child: CircularProgressIndicator());
       }
 
+      if (snapshot.hasError) {
+        return const Center(
+          child: Text(
+            'Could not load messages.',
+            style: TextStyle(color: black),
+          ),
+        );
+      }
+
       final chats = snapshot.data?.docs ?? [];
 
       if (chats.isEmpty) {
@@ -5467,7 +5476,11 @@ Widget _friendMessages() {
         itemCount: chats.length,
         itemBuilder: (context, index) {
           final chat = chats[index].data();
-          final ids = List<String>.from(chat['participantIds'] ?? []);
+
+          final ids = List<String>.from(
+            chat['participantIds'] ?? [],
+          );
+
           final friendUid = ids.firstWhere(
             (id) => id != user.uid,
             orElse: () => '',
@@ -5477,38 +5490,48 @@ Widget _friendMessages() {
             return const SizedBox.shrink();
           }
 
-          return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          final lastMessage =
+              (chat['lastMessage'] ?? '').toString();
+
+          return FutureBuilder<
+              QuerySnapshot<Map<String, dynamic>>>(
             future: FirebaseFirestore.instance
                 .collection('public_user_ids')
                 .where('uid', isEqualTo: friendUid)
                 .limit(1)
                 .get(),
             builder: (context, profileSnapshot) {
-              if (!profileSnapshot.hasData ||
-                  profileSnapshot.data!.docs.isEmpty) {
-                return const SizedBox.shrink();
+              String name = 'Playmixo User';
+              String photoURL = '';
+              String bio = '';
+              String userId = '';
+
+              if (profileSnapshot.hasData &&
+                  profileSnapshot.data!.docs.isNotEmpty) {
+                final profile =
+                    profileSnapshot.data!.docs.first.data();
+
+                name = (profile['displayName'] ??
+                        profile['name'] ??
+                        'Playmixo User')
+                    .toString();
+
+                photoURL =
+                    (profile['photoURL'] ?? '').toString();
+
+                bio = (profile['bio'] ?? '').toString();
+
+                userId =
+                    (profile['userId'] ?? '').toString();
               }
-
-              final profile =
-                  profileSnapshot.data!.docs.first.data();
-
-              final name =
-                  (profile['displayName'] ??
-                          profile['name'] ??
-                          'Playmixo User')
-                      .toString();
-
-              final userId =
-                  (profile['userId'] ?? '').toString();
-
-              final photoURL =
-                  (profile['photoURL'] ?? '').toString();
 
               return Card(
                 color: const Color(0xFF171717),
                 child: ListTile(
                   leading: GestureDetector(
                     onTap: () {
+                      if (userId.isEmpty) return;
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -5516,7 +5539,7 @@ Widget _friendMessages() {
                             userId: userId,
                             name: name,
                             photoURL: photoURL,
-                            bio: (profile['bio'] ?? '').toString(),
+                            bio: bio,
                           ),
                         ),
                       );
@@ -5535,6 +5558,16 @@ Widget _friendMessages() {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    lastMessage.isEmpty
+                        ? 'No message'
+                        : lastMessage,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white70,
                     ),
                   ),
                   onTap: () {
@@ -5560,6 +5593,9 @@ Widget _friendMessages() {
     },
   );
 }
+
+  
+
 
 Future<void> _sendFriendMessage(
   String friendUid,
