@@ -5429,6 +5429,7 @@ case 'Blocked Users':
   }
 
 
+
 Widget _friendMessages() {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -5490,40 +5491,41 @@ Widget _friendMessages() {
             return const SizedBox.shrink();
           }
 
-          final lastMessage =
-              (chat['lastMessage'] ?? '').toString();
-
           return FutureBuilder<
-              QuerySnapshot<Map<String, dynamic>>>(
+              DocumentSnapshot<Map<String, dynamic>>>(
             future: FirebaseFirestore.instance
-                .collection('public_user_ids')
-                .where('uid', isEqualTo: friendUid)
-                .limit(1)
+                .collection('users')
+                .doc(friendUid)
                 .get(),
             builder: (context, profileSnapshot) {
-              String name = 'Playmixo User';
-              String photoURL = '';
-              String bio = '';
-              String userId = '';
-
-              if (profileSnapshot.hasData &&
-                  profileSnapshot.data!.docs.isNotEmpty) {
-                final profile =
-                    profileSnapshot.data!.docs.first.data();
-
-                name = (profile['displayName'] ??
-                        profile['name'] ??
-                        'Playmixo User')
-                    .toString();
-
-                photoURL =
-                    (profile['photoURL'] ?? '').toString();
-
-                bio = (profile['bio'] ?? '').toString();
-
-                userId =
-                    (profile['userId'] ?? '').toString();
+              if (profileSnapshot.connectionState ==
+                  ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 70,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               }
+
+              final profile = profileSnapshot.data?.data();
+
+              final name = (profile?['displayName'] ??
+                      profile?['name'] ??
+                      'Playmixo User')
+                  .toString();
+
+              final userId =
+                  (profile?['userId'] ?? '').toString();
+
+              final photoURL =
+                  (profile?['photoURL'] ?? '').toString();
+
+              final bio =
+                  (profile?['bio'] ?? '').toString();
+
+              final lastMessage =
+                  (chat['lastMessage'] ?? '').toString();
 
               return Card(
                 color: const Color(0xFF171717),
@@ -5593,6 +5595,9 @@ Widget _friendMessages() {
     },
   );
 }
+          
+                        
+
 
   
 
