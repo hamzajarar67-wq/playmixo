@@ -5384,10 +5384,7 @@ case 'My Friends':
   return _myFriends();
 
 case 'Friend Messages':
-  return _emptyFeature(
-    'Friend Messages will be connected next.',
-    Icons.chat_bubble_outline,
-  );
+  return _friendMessages();
 
 case 'Blocked Users':
   return _emptyFeature(
@@ -5431,6 +5428,23 @@ case 'Blocked Users':
     );
   }
 
+
+Widget _friendMessages() {
+  return const Center(
+    child: Text(
+      'No messages yet.',
+      style: TextStyle(
+        color: black,
+        fontSize: 16,
+      ),
+    ),
+  );
+}
+
+
+
+
+    
 
 Widget _myFriends() {
   final user = FirebaseAuth.instance.currentUser;
