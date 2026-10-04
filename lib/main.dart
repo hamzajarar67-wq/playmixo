@@ -5430,18 +5430,339 @@ case 'Blocked Users':
 
 
 Widget _friendMessages() {
-  return const Center(
-    child: Text(
-      'No messages yet.',
-      style: TextStyle(
-        color: black,
-        fontSize: 16,
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return const Center(
+      child: Text(
+        'Please sign in first.',
+        style: TextStyle(color: black),
       ),
-    ),
+    );
+  }
+
+  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('chats')
+        .where('participantIds', arrayContains: user.uid)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      final chats = snapshot.data?.docs ?? [];
+
+      if (chats.isEmpty) {
+        return const Center(
+          child: Text(
+            'No messages yet.',
+            style: TextStyle(color: black),
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: chats.length,
+        itemBuilder: (context, index) {
+          final chat = chats[index].data();
+          final ids = List<String>.from(chat['participantIds'] ?? []);
+          final friendUid = ids.firstWhere(
+            (id) => id != user.uid,
+            orElse: () => '',
+          );
+
+          if (friendUid.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            future: FirebaseFirestore.instance
+                .collection('public_user_ids')
+                .where('uid', isEqualTo: friendUid)
+                .limit(1)
+                .get(),
+            builder: (context, profileSnapshot) {
+              if (!profileSnapshot.hasData ||
+                  profileSnapshot.data!.docs.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final profile =
+                  profileSnapshot.data!.docs.first.data();
+
+              final name =
+                  (profile['displayName'] ??
+                          profile['name'] ??
+                          'Playmixo User')
+                      .toString();
+
+              final userId =
+                  (profile['userId'] ?? '').toString();
+
+              final photoURL =
+                  (profile['photoURL'] ?? '').toString();
+
+              return Card(
+                color: const Color(0xFF171717),
+                child: ListTile(
+                  leading: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PublicProfilePage(
+                            userId: userId,
+                            name: name,
+                            photoURL: photoURL,
+                            bio: (profile['bio'] ?? '').toString(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: photoURL.isNotEmpty
+                          ? NetworkImage(photoURL)
+                          : null,
+                      child: photoURL.isEmpty
+                          ? const Icon(Icons.person)
+                          : null,
+                    ),
+                  ),
+                  title: Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Scaffold(
+                          body: _friendChat(
+                            friendUid,
+                            name,
+                            photoURL,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      );
+    },
   );
 }
 
+Future<void> _sendFriendMessage(
+  String friendUid,
+  String message,
+) async {
+  final user = FirebaseAuth.instance.currentUser;
+  final text = message.trim();
 
+  if (user == null || friendUid.isEmpty || text.isEmpty) {
+    return;
+  }
+
+  try {
+    final ids = [user.uid, friendUid]..sort();
+    final chatId = ids.join('_');
+
+    final chatRef = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId);
+
+    await chatRef.set({
+      'participantIds': ids,
+      'lastMessage': text,
+      'lastMessageAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    await chatRef.collection('messages').add({
+      'senderId': user.uid,
+      'text': text,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    _message('Message could not be sent.');
+  }
+}
+
+Widget _friendChat(
+  String friendUid,
+  String friendName,
+  String photoURL,
+) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return const Center(
+      child: Text(
+        'Please sign in first.',
+        style: TextStyle(color: black),
+      ),
+    );
+  }
+
+  final ids = [user.uid, friendUid]..sort();
+  final chatId = ids.join('_');
+
+  final messageController = TextEditingController();
+
+  return Column(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(12),
+        color: const Color(0xFF171717),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage:
+                  photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
+              child: photoURL.isEmpty
+                  ? const Icon(Icons.person)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              friendName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      Expanded(
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('chats')
+              .doc(chatId)
+              .collection('messages')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text(
+                  'Could not load messages.',
+                  style: TextStyle(color: black),
+                ),
+              );
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            final messages = snapshot.data?.docs ?? [];
+
+            if (messages.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No messages yet.',
+                  style: TextStyle(color: black),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              reverse: true,
+              padding: const EdgeInsets.all(12),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final data = messages[index].data();
+                final isMine = data['senderId'] == user.uid;
+                final text = (data['text'] ?? '').toString();
+                final createdAt = data['createdAt'] as Timestamp?;
+
+                return Align(
+                  alignment: isMine
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    padding: const EdgeInsets.all(12),
+                    constraints: const BoxConstraints(maxWidth: 280),
+                    decoration: BoxDecoration(
+                      color: isMine ? Colors.black : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          text,
+                          style: TextStyle(
+                            color: isMine ? Colors.white : Colors.black,
+                            fontSize: 15,
+                          ),
+                        ),
+                        if (createdAt != null)
+                          Text(
+                            TimeOfDay.fromDateTime(
+                              createdAt.toDate(),
+                            ).format(context),
+                            style: TextStyle(
+                              color: isMine
+                                  ? Colors.white70
+                                  : Colors.black54,
+                              fontSize: 10,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: messageController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type a message...',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.send, color: black),
+                onPressed: () async {
+                  final text = messageController.text.trim();
+                  if (text.isEmpty) return;
+
+                  await _sendFriendMessage(friendUid, text);
+                  messageController.clear();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+    
 
 
     
