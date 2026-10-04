@@ -5764,7 +5764,6 @@ Widget _friendChat(
 }
     
 
-
 Widget _myFriends() {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -5855,25 +5854,51 @@ Widget _myFriends() {
                 final choice = await showDialog<String>(
                   context: context,
                   builder: (dialogContext) => AlertDialog(
-                    title: Text(name),
-                    content: const Text('Choose an option'),
+                    backgroundColor: Colors.black,
+                    title: Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    content: const Text(
+                      'Choose an option',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     actions: [
                       TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
                         onPressed: () =>
                             Navigator.pop(dialogContext, 'delete'),
                         child: const Text('Delete'),
                       ),
                       TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
                         onPressed: () =>
                             Navigator.pop(dialogContext, 'message'),
                         child: const Text('Message'),
                       ),
                       TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
                         onPressed: () =>
                             Navigator.pop(dialogContext, 'profile'),
                         child: const Text('Profile'),
                       ),
                       TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
                         onPressed: () =>
                             Navigator.pop(dialogContext, 'cancel'),
                         child: const Text('Cancel'),
@@ -5913,17 +5938,33 @@ Widget _myFriends() {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (dialogContext) => AlertDialog(
-                      title: const Text('Delete Friend?'),
+                      backgroundColor: Colors.black,
+                      title: const Text(
+                        'Delete Friend?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       content: Text(
                         'Are you sure you want to delete $name?',
+                        style: const TextStyle(color: Colors.white),
                       ),
                       actions: [
                         TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
                           onPressed: () =>
                               Navigator.pop(dialogContext, false),
                           child: const Text('No'),
                         ),
                         TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
                           onPressed: () =>
                               Navigator.pop(dialogContext, true),
                           child: const Text('Yes'),
@@ -5983,9 +6024,10 @@ Widget _myFriends() {
       );
     },
   );
-}    
+}
 
 
+              
 
 
     
