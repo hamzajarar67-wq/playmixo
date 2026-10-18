@@ -4425,10 +4425,12 @@ Future<void> _acceptFriendRequest(
 
     _message('Friend request accepted.');
   } catch (e) {
-    _message('Could not accept request.');
+    debugPrint('Accept friend request error: $e');
+    _message('Could not accept request: $e');
   }
 }
 
+    
 Future<void> _rejectFriendRequest(String requestId) async {
   try {
     await _firestore
