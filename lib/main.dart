@@ -4381,52 +4381,54 @@ Future<void> _acceptFriendRequest(
   String senderId,
 ) async {
   final user = _auth.currentUser;
-
   if (user == null) return;
 
   try {
-    final batch = _firestore.batch();
-
-    // Mere Friends mein sender
-    final myFriendRef = _firestore
+    await _firestore
         .collection('users')
         .doc(user.uid)
         .collection('friends')
-        .doc(senderId);
-
-    // Sender ke Friends mein main
-    final senderFriendRef = _firestore
-        .collection('users')
         .doc(senderId)
-        .collection('friends')
-        .doc(user.uid);
-
-    batch.set(myFriendRef, {
+        .set({
       'uid': senderId,
       'createdAt': FieldValue.serverTimestamp(),
     });
+    _message('Step 1 passed: My friend saved.');
+  } catch (e) {
+    _message('Step 1 failed: $e');
+    debugPrint('Step 1 failed: $e');
+    return;
+  }
 
-    batch.set(senderFriendRef, {
+  try {
+    await _firestore
+        .collection('users')
+        .doc(senderId)
+        .collection('friends')
+        .doc(user.uid)
+        .set({
       'uid': user.uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
+    _message('Step 2 passed: Sender friend saved.');
+  } catch (e) {
+    _message('Step 2 failed: $e');
+    debugPrint('Step 2 failed: $e');
+    return;
+  }
 
-    // Request accepted
-    final requestRef = _firestore
+  try {
+    await _firestore
         .collection('friend_requests')
-        .doc(requestId);
-
-    batch.update(requestRef, {
+        .doc(requestId)
+        .update({
       'status': 'accepted',
       'acceptedAt': FieldValue.serverTimestamp(),
     });
-
-    await batch.commit();
-
-    _message('Friend request accepted.');
+    _message('Friend request accepted!');
   } catch (e) {
-    debugPrint('Accept friend request error: $e');
-    _message('Could not accept request: $e');
+    _message('Step 3 failed: $e');
+    debugPrint('Step 3 failed: $e');
   }
 }
 
