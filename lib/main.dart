@@ -4384,51 +4384,45 @@ Future<void> _acceptFriendRequest(
   if (user == null) return;
 
   try {
-    await _firestore
+    final batch = _firestore.batch();
+
+    final myFriendRef = _firestore
         .collection('users')
         .doc(user.uid)
         .collection('friends')
+        .doc(senderId);
+
+    final senderFriendRef = _firestore
+        .collection('users')
         .doc(senderId)
-        .set({
+        .collection('friends')
+        .doc(user.uid);
+
+    final requestRef = _firestore
+        .collection('friend_requests')
+        .doc(requestId);
+
+    batch.set(myFriendRef, {
       'uid': senderId,
       'createdAt': FieldValue.serverTimestamp(),
     });
-    _message('Step 1 passed: My friend saved.');
-  } catch (e) {
-    _message('Step 1 failed: $e');
-    debugPrint('Step 1 failed: $e');
-    return;
-  }
 
-  try {
-    await _firestore
-        .collection('users')
-        .doc(senderId)
-        .collection('friends')
-        .doc(user.uid)
-        .set({
+    batch.set(senderFriendRef, {
       'uid': user.uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
-    _message('Step 2 passed: Sender friend saved.');
-  } catch (e) {
-    _message('Step 2 failed: $e');
-    debugPrint('Step 2 failed: $e');
-    return;
-  }
 
-  try {
-    await _firestore
-        .collection('friend_requests')
-        .doc(requestId)
-        .update({
+    batch.update(requestRef, {
       'status': 'accepted',
       'acceptedAt': FieldValue.serverTimestamp(),
     });
-    _message('Friend request accepted!');
+
+    await batch.commit();
+
+    _message('Friend request accepted.');
   } catch (e) {
-    _message('Step 3 failed: $e');
-    debugPrint('Step 3 failed: $e');
+    debugPrint('Accept friend request error: $e');
+    _message('Could not accept request: $e');
   }
 }
 
@@ -5433,9 +5427,8 @@ case 'Blocked Users':
   }
 
 
-
 Widget _friendMessages() {
-  final user = FirebaseAuth.instance.currentUser;
+  final user = _auth.currentUser;
 
   if (user == null) {
     return const Center(
@@ -5447,7 +5440,7 @@ Widget _friendMessages() {
   }
 
   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-    stream: FirebaseFirestore.instance
+    stream: _firestore
         .collection('chats')
         .where('participantIds', arrayContains: user.uid)
         .snapshots(),
@@ -5496,37 +5489,30 @@ Widget _friendMessages() {
           }
 
           return FutureBuilder<
-              DocumentSnapshot<Map<String, dynamic>>>(
-            future: FirebaseFirestore.instance
-                .collection('users')
-                .doc(friendUid)
+              QuerySnapshot<Map<String, dynamic>>>(
+            future: _firestore
+                .collection('public_user_ids')
+                .where('uid', isEqualTo: friendUid)
+                .limit(1)
                 .get(),
             builder: (context, profileSnapshot) {
-              if (profileSnapshot.connectionState ==
-                  ConnectionState.waiting) {
-                return const SizedBox(
-                  height: 70,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+              final profile =
+                  profileSnapshot.data?.docs.isNotEmpty == true
+                      ? profileSnapshot.data!.docs.first.data()
+                      : <String, dynamic>{};
 
-              final profile = profileSnapshot.data?.data();
-
-              final name = (profile?['displayName'] ??
-                      profile?['name'] ??
+              final name = (profile['displayName'] ??
+                      profile['name'] ??
                       'Playmixo User')
                   .toString();
 
               final userId =
-                  (profile?['userId'] ?? '').toString();
+                  (profile['userId'] ?? '').toString();
 
               final photoURL =
-                  (profile?['photoURL'] ?? '').toString();
+                  (profile['photoURL'] ?? '').toString();
 
-              final bio =
-                  (profile?['bio'] ?? '').toString();
+              final bio = (profile['bio'] ?? '').toString();
 
               final lastMessage =
                   (chat['lastMessage'] ?? '').toString();
@@ -5534,30 +5520,13 @@ Widget _friendMessages() {
               return Card(
                 color: const Color(0xFF171717),
                 child: ListTile(
-                  leading: GestureDetector(
-                    onTap: () {
-                      if (userId.isEmpty) return;
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PublicProfilePage(
-                            userId: userId,
-                            name: name,
-                            photoURL: photoURL,
-                            bio: bio,
-                          ),
-                        ),
-                      );
-                    },
-                    child: CircleAvatar(
-                      backgroundImage: photoURL.isNotEmpty
-                          ? NetworkImage(photoURL)
-                          : null,
-                      child: photoURL.isEmpty
-                          ? const Icon(Icons.person)
-                          : null,
-                    ),
+                  leading: CircleAvatar(
+                    backgroundImage: photoURL.isNotEmpty
+                        ? NetworkImage(photoURL)
+                        : null,
+                    child: photoURL.isEmpty
+                        ? const Icon(Icons.person)
+                        : null,
                   ),
                   title: Text(
                     name,
