@@ -5450,13 +5450,13 @@ Widget _friendMessages() {
       }
 
       if (snapshot.hasError) {
-        return const Center(
-          child: Text(
-            'Could not load messages.',
-            style: TextStyle(color: black),
-          ),
-        );
-      }
+  return Center(
+    child: Text(
+      'Error: ${snapshot.error}',
+      style: const TextStyle(color: Colors.red),
+    ),
+  );
+}
 
       final chats = snapshot.data?.docs ?? [];
 
