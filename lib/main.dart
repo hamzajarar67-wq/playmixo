@@ -5451,9 +5451,15 @@ Widget _friendMessages() {
 
 if (snapshot.hasError) {
   return Center(
-    child: Text(
-      'Chat error: ${snapshot.error}',
-      style: const TextStyle(color: Colors.red),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        'Chat error: ${snapshot.error}\n\n'
+        'Login UID: ${_auth.currentUser?.uid ?? "Not signed in"}\n'
+        'Firebase project: ${_firestore.app.options.projectId}',
+        style: const TextStyle(color: Colors.red),
+        textAlign: TextAlign.center,
+      ),
     ),
   );
 }
