@@ -5449,14 +5449,15 @@ Widget _friendMessages() {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (snapshot.hasError) {
+if (snapshot.hasError) {
   return Center(
     child: Text(
-      'Error: ${snapshot.error}',
+      'Chat error: ${snapshot.error}',
       style: const TextStyle(color: Colors.red),
     ),
   );
 }
+        
 
       final chats = snapshot.data?.docs ?? [];
 
