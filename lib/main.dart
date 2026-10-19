@@ -5461,6 +5461,10 @@ if (snapshot.hasError) {
 
       final chats = snapshot.data?.docs ?? [];
 
+debugPrint(
+  'PLAYMIXO LOGIN UID: ${FirebaseAuth.instance.currentUser?.uid}',
+);
+
       if (chats.isEmpty) {
         return const Center(
           child: Text(
